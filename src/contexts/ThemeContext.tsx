@@ -7,11 +7,22 @@ interface ThemeContextValor {
   alternarTema: () => void
 }
 
+const CHAVE = 'waypoint-tema'
+
 const ThemeContext = createContext<ThemeContextValor | null>(null)
 
+function lerEscolhaSalva(): Tema | null {
+  try {
+    const salvo = localStorage.getItem(CHAVE)
+    return salvo === 'claro' || salvo === 'noite' ? salvo : null
+  } catch {
+    return null
+  }
+}
+
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  // Padrão do projeto: tema noite.
-  const [tema, setTema] = useState<Tema>('noite')
+  // Padrão do projeto: tema noite. O claro é opcional e fica salvo no localStorage.
+  const [tema, setTema] = useState<Tema>(() => lerEscolhaSalva() ?? 'noite')
 
   // A classe .dark no <html> troca todas as cores de uma vez (tokens do index.css)
   useEffect(() => {
@@ -21,6 +32,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const alternarTema = () => {
     const proximo: Tema = tema === 'noite' ? 'claro' : 'noite'
     setTema(proximo)
+    try {
+      localStorage.setItem(CHAVE, proximo)
+    } catch {
+      // navegação privada: a escolha só não fica salva
+    }
   }
 
   return <ThemeContext.Provider value={{ tema, alternarTema }}>{children}</ThemeContext.Provider>
