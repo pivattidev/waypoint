@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import Logo from './Logo'
-import ThemeToggle from './ThemeToggle'
+import ThemeToggle from './ThemeToogle'
 
 const links = [
   { para: '/', rotulo: 'Home' },
