@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import Logo from './Logo'
+import ThemeToggle from './ThemeToggle'
 
 const links = [
   { para: '/', rotulo: 'Home' },
@@ -26,6 +27,10 @@ export default function Header() {
             </NavLink>
           ))}
         </nav>
+
+        <div className="ml-auto flex items-center gap-2">
+          <ThemeToggle />
+        </div>
       </div>
     </header>
   )
