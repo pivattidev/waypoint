@@ -1,7 +1,10 @@
 import type { ReactNode } from 'react'
 import PageHeader from '../components/PageHeader'
 
-/** Princípios em forma de frase: cada um é uma afirmação curta, com a explicação. */
+/**
+ * Princípios em forma de frase: cada um é uma afirmação curta e grande, com a explicação ao lado.
+ * (Sem cartões com ícone: o texto é o elemento visual, como no bloco "O problema".)
+ */
 const principios = [
   {
     frase: 'O relato não sabe quem você é.',
@@ -53,11 +56,15 @@ export default function Sobre() {
         </Secao>
 
         <Secao id="principios" titulo="Princípios">
+          {/* Uma frase grande por linha, com a explicação ao lado: o texto é o próprio desenho */}
           <ul className="divide-y divide-line">
             {principios.map((p) => (
-              <li key={p.frase} className="py-6 first:pt-0 last:pb-0">
-                <p className="text-xl font-bold">{p.frase}</p>
-                <p className="mt-2 max-w-xl text-lg text-muted">{p.texto}</p>
+              <li
+                key={p.frase}
+                className="grid gap-x-12 gap-y-3 py-8 first:pt-0 last:pb-0 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:items-baseline"
+              >
+                <p className="font-display text-[clamp(1.5rem,2.6vw,2.1rem)] font-bold leading-[1.15] tracking-[-0.02em]">{p.frase}</p>
+                <p className="max-w-xl text-lg text-muted">{p.texto}</p>
               </li>
             ))}
           </ul>
