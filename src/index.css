@@ -195,3 +195,61 @@
     display: none;
   }
 }
+
+/* ---------- Respostas a ações do usuário (curtas) ---------- */
+
+/* Entrada de painel que surge de um gatilho (menu, gaveta, ficha) */
+@keyframes surgir {
+  from {
+    transform: translateY(-6px) scale(0.98);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+.surgir {
+  animation: surgir 180ms var(--ease-saida) both;
+}
+
+/* ---------- Entrada da página: os blocos surgem em sequência, subindo um pouco ----------
+   Uso: className="entrar" e style={{ '--i': n }} para escalonar (n * 60ms).
+   Só opacidade e transform (não força layout). Desligado com prefers-reduced-motion (regra da base). */
+@keyframes entrar {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.entrar {
+  animation: entrar 560ms var(--ease-saida) both;
+  animation-delay: calc(var(--i, 0) * 60ms);
+}
+
+/* ---------- Surgimento ao rolar (componente Revelar) ----------
+   O bloco começa invisível e entra com a mesma animação "entrar" quando chega na tela.
+   Com prefers-reduced-motion, aparece direto, sem movimento. */
+.revelar:not(.visivel) {
+  opacity: 0;
+  transform: translateY(18px);
+}
+.revelar.visivel {
+  animation: entrar 640ms var(--ease-saida) both;
+  animation-delay: calc(var(--i, 0) * 70ms);
+}
+@media (prefers-reduced-motion: reduce) {
+  .revelar:not(.visivel) {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Resposta do FAQ entra suave ao abrir o <details> (resposta a uma ação do usuário) */
+details[open] > .resposta {
+  animation: entrar 320ms var(--ease-saida) both;
+}
