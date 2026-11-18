@@ -1,3 +1,10 @@
+import { Route, Routes } from 'react-router-dom'
+import Home from './pages/Home'
+
 export default function App() {
-  return <h1 className="p-8 text-4xl font-bold text-teal-700">WayPoint</h1>
+  return (
+    <Routes>
+      <Route path="/" element={<Home />} />
+    </Routes>
+  )
 }
