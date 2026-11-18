@@ -1,1 +1,82 @@
 @import "tailwindcss";
+
+/* ---------- Tokens semânticos: cada cor tem o nome da sua FUNÇÃO, não do tom ----------
+   Tons intermediários são derivados da tinta (#10272B) e da névoa (#E9F5F5).
+   teal  = ÚNICO acento: ação principal, estado ativo, rota selecionada, foco
+   alert = vermelho SEMÂNTICO: pins de relato, alerta e erro (nunca botão principal)
+   lamp  = âmbar, exceção registrada: SÓ a luz dos postes no mapa
+   Contraste de todos os pares de texto e fundo conferido (mínimo 4,5:1). */
+:root {
+  color-scheme: light;
+  --bg: #e9f5f5; /* névoa */
+  --mist: #daebeb;
+  --panel: #ffffff;
+  --ink: #10272b; /* tinta */
+  --ink-2: #2c4a4f;
+  --muted: #4a6569;
+  --line: #c3dadb; /* divisória decorativa (meio-fio) */
+  --line-strong: #6f8d90; /* borda de campo e controle, contraste >= 3:1 */
+  --teal: #17a0a8;
+  --primary: #0b6670; /* teal profundo: botão principal no claro */
+  --on-primary: #ffffff;
+  --link: #0b6670;
+  --tealbg: #d2ecec;
+  --night: #08454c; /* teal noite */
+  --on-night: #e9f5f5;
+  --alert: #a82633;
+  --on-alert: #ffffff;
+  --alert-bg: #f6e3e5; /* rosé */
+  --alert-text: #a82633;
+  --lamp: #f5b547;
+  --lamp-glow: #ffd98a;
+  --lamp-text: #8a5200;
+  --map: #daebeb;
+  --map-block: #c9e1e1;
+  --map-park: #bfe0dc;
+  --map-water: #b7dbdd;
+  --route: #0b6670; /* no claro o teal puro não tem contraste para traço fino */
+  --route-alt: #4a6569;
+  --skeleton: #cfe3e3;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-mist: var(--mist);
+  --color-panel: var(--panel);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-teal: var(--teal);
+  --color-primary: var(--primary);
+  --color-on-primary: var(--on-primary);
+  --color-link: var(--link);
+  --color-tealbg: var(--tealbg);
+  --color-night: var(--night);
+  --color-on-night: var(--on-night);
+  --color-alert: var(--alert);
+  --color-on-alert: var(--on-alert);
+  --color-alert-bg: var(--alert-bg);
+  --color-alert-text: var(--alert-text);
+  --color-lamp: var(--lamp);
+  --color-lamp-glow: var(--lamp-glow);
+  --color-lamp-text: var(--lamp-text);
+  --color-map: var(--map);
+  --color-map-block: var(--map-block);
+  --color-map-park: var(--map-park);
+  --color-map-water: var(--map-water);
+  --color-route: var(--route);
+  --color-route-alt: var(--route-alt);
+  --color-skeleton: var(--skeleton);
+}
+
+@layer base {
+  body {
+    background-color: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    min-height: 100dvh;
+  }
+}
