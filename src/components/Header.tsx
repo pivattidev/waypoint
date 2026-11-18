@@ -11,6 +11,12 @@ const links = [
   { para: '/contato', rotulo: 'Contato' },
 ]
 
+function classeLinkDesktop({ isActive }: { isActive: boolean }) {
+  return `relative flex h-full items-center px-3 text-[15px] font-bold transition-colors after:absolute after:inset-x-3 after:bottom-0 after:h-[3px] after:rounded-t-full ${
+    isActive ? 'text-ink after:bg-teal' : 'text-muted hover:text-ink after:bg-transparent'
+  }`
+}
+
 function classeLinkCelular({ isActive }: { isActive: boolean }) {
   return `flex items-center gap-3 rounded-ctl px-3 py-3 text-lg font-bold ${
     isActive ? 'bg-tealbg text-ink' : 'text-ink-2 hover:bg-mist'
@@ -19,6 +25,16 @@ function classeLinkCelular({ isActive }: { isActive: boolean }) {
 
 export default function Header() {
   const [menuAberto, setMenuAberto] = useState(false)
+
+  // rolou: o header ganha vidro (fundo translúcido + desfoque)
+  const [rolou, setRolou] = useState(() => window.scrollY > 8)
+
+  // Escuta a rolagem da página; o "return" remove o ouvinte quando o Header sai da tela
+  useEffect(() => {
+    const aoRolar = () => setRolou(window.scrollY > 8)
+    window.addEventListener('scroll', aoRolar, { passive: true })
+    return () => window.removeEventListener('scroll', aoRolar)
+  }, [])
 
   // Fecha com Esc
   useEffect(() => {
@@ -31,18 +47,18 @@ export default function Header() {
   }, [menuAberto])
 
   return (
-    <header className="border-b border-line">
+    <header
+      // Fixo e translúcido: no topo some no fundo; ao rolar vira vidro sobre o conteúdo.
+      className={`fixed inset-x-0 top-0 z-40 transition-[background-color,border-color] duration-200 ${
+        rolou || menuAberto ? 'border-b border-line/50 bg-bg/90 backdrop-blur-md' : 'border-b border-transparent bg-transparent'
+      }`}
+    >
       <div className="mx-auto flex h-[76px] max-w-[1760px] items-center gap-6 px-4 sm:px-6 lg:px-12">
         <Logo />
 
-        <nav aria-label="Principal" className="hidden gap-4 xl:flex">
+        <nav aria-label="Principal" className="hidden h-full items-stretch xl:flex">
           {links.map((link) => (
-            <NavLink
-              key={link.para}
-              to={link.para}
-              end={link.para === '/'}
-              className={({ isActive }) => (isActive ? 'font-bold text-ink' : 'text-muted hover:text-ink')}
-            >
+            <NavLink key={link.para} to={link.para} end={link.para === '/'} className={classeLinkDesktop}>
               {link.rotulo}
             </NavLink>
           ))}
