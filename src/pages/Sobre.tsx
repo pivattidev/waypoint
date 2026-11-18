@@ -1,6 +1,22 @@
 import type { ReactNode } from 'react'
 import PageHeader from '../components/PageHeader'
 
+/** Princípios em forma de frase: cada um é uma afirmação curta, com a explicação. */
+const principios = [
+  {
+    frase: 'O relato não sabe quem você é.',
+    texto: 'Não guardamos nome, e-mail nem IP de quem enviou. O anonimato está no próprio banco de dados, não numa promessa.',
+  },
+  {
+    frase: 'Nada vai ao mapa sem ser lido.',
+    texto: 'Todo relato entra como pendente. A moderação aprova, ou rejeita com motivo, antes de ele aparecer para alguém.',
+  },
+  {
+    frase: 'Vale o que é recente e perto.',
+    texto: 'Os relatos são organizados por região e por data, para mostrar o que importa no trajeto de hoje.',
+  },
+]
+
 /** Seção no padrão do site: nome à esquerda (coluna fixa), conteúdo à direita, linha fina em cima. */
 function Secao({ id, titulo, children }: { id: string; titulo: string; children: ReactNode }) {
   return (
@@ -34,6 +50,17 @@ export default function Sobre() {
             Essa informação existe. Ela está com quem passou por lá, mas fica espalhada em grupos de mensagem, sem conferência e
             sem proteger quem conta.
           </p>
+        </Secao>
+
+        <Secao id="principios" titulo="Princípios">
+          <ul className="divide-y divide-line">
+            {principios.map((p) => (
+              <li key={p.frase} className="py-6 first:pt-0 last:pb-0">
+                <p className="text-xl font-bold">{p.frase}</p>
+                <p className="mt-2 max-w-xl text-lg text-muted">{p.texto}</p>
+              </li>
+            ))}
+          </ul>
         </Secao>
       </div>
     </>
