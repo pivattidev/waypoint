@@ -112,6 +112,15 @@
   --font-sans: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
   /* Overpass deriva da Highway Gothic, a letra das placas de trânsito. */
   --font-display: "Overpass Variable", "Atkinson Hyperlegible", system-ui, sans-serif;
+
+  /* Escala de raios (regra fixa) */
+  --radius-placa: 6px; /* placas de rua */
+  --radius-ctl: 10px; /* botões e campos */
+  --radius-painel: 16px; /* painéis e cards */
+  --radius-mapa: 24px; /* contêiner de mapa */
+
+  /* Curva padrão: saída forte, sem "ease-in" em entradas */
+  --ease-saida: cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 @layer base {
@@ -134,5 +143,55 @@
 
   p {
     text-wrap: pretty;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--teal);
+    outline-offset: 2px;
+  }
+
+  /* Âncoras e foco não ficam escondidos atrás do header fixo */
+  html {
+    scroll-padding-top: 92px;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-delay: 0ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* <details> sem o triângulo padrão: cada um desenha o próprio marcador */
+  summary {
+    list-style: none;
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+}
+
+@layer utilities {
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+  /* Faixa de chips que rola na horizontal SEM rolar a página */
+  .faixa-rolavel {
+    overflow-x: auto;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+  .faixa-rolavel::-webkit-scrollbar {
+    display: none;
   }
 }
