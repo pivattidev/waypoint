@@ -108,6 +108,12 @@
   --color-skeleton: var(--skeleton);
 }
 
+@theme {
+  --font-sans: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* Overpass deriva da Highway Gothic, a letra das placas de trânsito. */
+  --font-display: "Overpass Variable", "Atkinson Hyperlegible", system-ui, sans-serif;
+}
+
 @layer base {
   body {
     background-color: var(--bg);
@@ -115,5 +121,18 @@
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     min-height: 100dvh;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
   }
 }
