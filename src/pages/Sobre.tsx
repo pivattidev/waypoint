@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import PageHeader from '../components/PageHeader'
+import Revelar from '../components/Revelar'
 
 /**
  * Princípios em forma de frase: cada um é uma afirmação curta e grande, com a explicação ao lado.
@@ -25,15 +26,22 @@ const ods = [
   { n: '10', titulo: 'Redução das desigualdades', texto: 'Informação de segurança aberta e gratuita, para qualquer bairro.' },
 ]
 
-/** Seção no padrão do site: nome à esquerda (coluna fixa), conteúdo à direita, linha fina em cima. */
+/**
+ * Seção no padrão do site: nome à esquerda (coluna fixa), conteúdo à direita, linha fina em cima.
+ * Surge ao rolar (Revelar).
+ */
 function Secao({ id, titulo, children }: { id: string; titulo: string; children: ReactNode }) {
   return (
-    <section aria-labelledby={id} className="grid gap-x-16 gap-y-6 border-t border-line pt-10 lg:grid-cols-[220px_minmax(0,1fr)]">
+    <Revelar
+      como="section"
+      aria-labelledby={id}
+      className="grid gap-x-16 gap-y-6 border-t border-line pt-10 lg:grid-cols-[220px_minmax(0,1fr)]"
+    >
       <h2 id={id} className="text-lg font-extrabold">
         {titulo}
       </h2>
       <div className="min-w-0">{children}</div>
-    </section>
+    </Revelar>
   )
 }
 
@@ -63,14 +71,16 @@ export default function Sobre() {
         <Secao id="principios" titulo="Princípios">
           {/* Uma frase grande por linha, com a explicação ao lado: o texto é o próprio desenho */}
           <ul className="divide-y divide-line">
-            {principios.map((p) => (
-              <li
+            {principios.map((p, i) => (
+              <Revelar
                 key={p.frase}
+                como="li"
+                indice={i}
                 className="grid gap-x-12 gap-y-3 py-8 first:pt-0 last:pb-0 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:items-baseline"
               >
                 <p className="font-display text-[clamp(1.5rem,2.6vw,2.1rem)] font-bold leading-[1.15] tracking-[-0.02em]">{p.frase}</p>
                 <p className="max-w-xl text-lg text-muted">{p.texto}</p>
-              </li>
+              </Revelar>
             ))}
           </ul>
         </Secao>
@@ -78,8 +88,8 @@ export default function Sobre() {
         <Secao id="ods" titulo="ODS da ONU">
           {/* Número em cima, título e texto embaixo: tudo alinhado à mesma margem esquerda */}
           <ul className="grid gap-12 md:grid-cols-2 md:gap-16">
-            {ods.map((o) => (
-              <li key={o.n}>
+            {ods.map((o, i) => (
+              <Revelar key={o.n} como="li" indice={i}>
                 {/* Só o número (a seção já diz "ODS da ONU"); o leitor de tela ouve "ODS 11" */}
                 <p className="tabular font-display text-7xl font-extrabold leading-none tracking-[-0.05em] text-link">
                   <span className="sr-only">ODS </span>
@@ -87,7 +97,7 @@ export default function Sobre() {
                 </p>
                 <h3 className="mt-5 text-xl leading-tight">{o.titulo}</h3>
                 <p className="mt-2 max-w-md text-[15px] text-muted">{o.texto}</p>
-              </li>
+              </Revelar>
             ))}
           </ul>
         </Secao>
