@@ -20,6 +20,11 @@ const principios = [
   },
 ]
 
+const ods = [
+  { n: '11', titulo: 'Cidades e comunidades sustentáveis', texto: 'Espaços públicos mais seguros e acessíveis para quem anda a pé.' },
+  { n: '10', titulo: 'Redução das desigualdades', texto: 'Informação de segurança aberta e gratuita, para qualquer bairro.' },
+]
+
 /** Seção no padrão do site: nome à esquerda (coluna fixa), conteúdo à direita, linha fina em cima. */
 function Secao({ id, titulo, children }: { id: string; titulo: string; children: ReactNode }) {
   return (
@@ -65,6 +70,23 @@ export default function Sobre() {
               >
                 <p className="font-display text-[clamp(1.5rem,2.6vw,2.1rem)] font-bold leading-[1.15] tracking-[-0.02em]">{p.frase}</p>
                 <p className="max-w-xl text-lg text-muted">{p.texto}</p>
+              </li>
+            ))}
+          </ul>
+        </Secao>
+
+        <Secao id="ods" titulo="ODS da ONU">
+          {/* Número em cima, título e texto embaixo: tudo alinhado à mesma margem esquerda */}
+          <ul className="grid gap-12 md:grid-cols-2 md:gap-16">
+            {ods.map((o) => (
+              <li key={o.n}>
+                {/* Só o número (a seção já diz "ODS da ONU"); o leitor de tela ouve "ODS 11" */}
+                <p className="tabular font-display text-7xl font-extrabold leading-none tracking-[-0.05em] text-link">
+                  <span className="sr-only">ODS </span>
+                  {o.n}
+                </p>
+                <h3 className="mt-5 text-xl leading-tight">{o.titulo}</h3>
+                <p className="mt-2 max-w-md text-[15px] text-muted">{o.texto}</p>
               </li>
             ))}
           </ul>
