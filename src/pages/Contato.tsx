@@ -27,11 +27,13 @@ function validar(form: FormContato): ErrosContato {
 export default function Contato() {
   const [form, setForm] = useState<FormContato>(vazio)
   const [erros, setErros] = useState<ErrosContato>({})
+  const [pronto, setPronto] = useState(false)
   const [linkGmail, setLinkGmail] = useState('')
 
   const atualizar = (campo: keyof FormContato, valor: string) => {
     setForm((f) => ({ ...f, [campo]: valor }))
     setErros((e) => ({ ...e, [campo]: undefined }))
+    setPronto(false)
   }
 
   const enviar = (evento: FormEvent) => {
@@ -54,6 +56,7 @@ export default function Contato() {
     )
 
     window.location.href = `mailto:${EMAIL_CONTATO}?subject=${assunto}&body=${corpo}`
+    setPronto(true)
   }
 
   return (
@@ -63,6 +66,12 @@ export default function Contato() {
       </PageHeader>
 
       <form noValidate onSubmit={enviar} className="flex max-w-3xl flex-col gap-6">
+        {pronto && (
+          <p role="status" className="entrar border-l-2 border-teal pl-4 text-ink">
+            <strong className="block">Mensagem pronta no seu app de e-mail.</strong>
+            <span className="text-muted">Confira e envie por lá. Se nada abriu, escreva para {EMAIL_CONTATO}.</span>
+          </p>
+        )}
         <Campo id="nome" rotulo="Nome" erro={erros.nome}>
           <Entrada id="nome" name="nome" autoComplete="name" value={form.nome} erro={!!erros.nome} onChange={(e) => atualizar('nome', e.target.value)} />
         </Campo>
