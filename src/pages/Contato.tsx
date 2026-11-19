@@ -75,11 +75,17 @@ export default function Contato() {
       <div className="grid gap-14 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] xl:gap-20">
       <form noValidate onSubmit={enviar} className="entrar flex flex-col gap-6" style={{ '--i': 3 } as CSSProperties}>
           {pronto && (
-            <p role="status" className="entrar border-l-2 border-teal pl-4 text-ink">
-              <strong className="block">Mensagem pronta no seu app de e-mail.</strong>
-              <span className="text-muted">Confira e envie por lá. Se nada abriu, escreva para {EMAIL_CONTATO}.</span>
-            </p>
-          )}
+  <p role="status" className="entrar border-l-2 border-teal pl-4 text-ink">
+    <strong className="block">Mensagem pronta no seu app de e-mail.</strong>
+    <span className="text-muted">
+      Confira e envie por lá. Se nada abriu,{' '}
+      <a href={linkGmail} target="_blank" rel="noreferrer" className="font-bold text-link underline underline-offset-4">
+        abrir no Gmail
+      </a>{' '}
+      ou escreva para {EMAIL_CONTATO}.
+    </span>
+  </p>
+)}
           {/* Nome e e-mail lado a lado: campos curtos não precisam da largura toda */}
           <div className="grid gap-6 md:grid-cols-2">
             <Campo id="nome" rotulo="Nome" erro={erros.nome}>
