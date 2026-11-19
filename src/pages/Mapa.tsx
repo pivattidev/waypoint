@@ -1,5 +1,5 @@
 import { useState, type CSSProperties } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useLocation, useSearchParams } from 'react-router-dom'
 import { LinkBotao } from '../components/Button'
 import CategoriaIcone from '../components/CategoriaIcone'
 import { Carregando, ListaVazia, MensagemErro } from '../components/EstadoTela'
@@ -8,6 +8,12 @@ import { useRequisicao } from '../hooks/useRequisicao'
 import { listarRegioes } from '../services/regioes'
 import { listarRelatosDaRegiao } from '../services/relatos'
 import { tempoDecorrido } from '../utils/formatar'
+
+/** Partida e destino chegam da busca da Home por estado de navegação: não ficam na URL nem são salvos. */
+interface BuscaRota {
+  origem: string
+  destino: string
+}
 
 const ordem = (i: number) => ({ '--i': i }) as CSSProperties
 
@@ -19,6 +25,7 @@ const abaRegiao = (ativa: boolean) =>
 
 export default function Mapa() {
   const regioes = useRequisicao(listarRegioes, [])
+  const busca = (useLocation().state as BuscaRota | null) ?? null
   // A região escolhida fica na URL (?regiao=2): links de outras páginas abrem o mapa direto nela
   const [params, setParams] = useSearchParams()
   const regiaoUrl = Number(params.get('regiao'))
@@ -44,6 +51,15 @@ export default function Mapa() {
           <p className="entrar mt-3 text-[17px] text-muted" style={ordem(1)}>
             Relatos aprovados por região. Toque num pin para ver o que aconteceu ali.
           </p>
+
+          {busca && (
+            <p role="status" className="entrar mt-5 border-l-2 border-teal pl-4 text-[15px] text-muted" style={ordem(2)}>
+              <strong className="block text-ink">
+                De {busca.origem} para {busca.destino}
+              </strong>
+              O cálculo de rota chega com a API. Por enquanto, veja os relatos da região.
+            </p>
+          )}
 
           {regioes.carregando && <div className="mt-6 h-11 w-3/4 animate-pulse rounded-full bg-skeleton" aria-hidden />}
           {regioes.erro && (
