@@ -1,10 +1,11 @@
-import { useState, type CSSProperties } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { LinkBotao } from '../components/Button'
 import { Carregando, ListaVazia, MensagemErro } from '../components/EstadoTela'
+import HeroRota from '../components/HeroRota'
 import ItemRelato from '../components/ItemRelato'
 import MapaPrevia from '../components/MapaPrevia'
-import NotaAnonimato from '../components/NotaAnonimato'
+import NotaAnonimato from '../components/notaAnonimato'
 import Pin from '../components/Pin'
 import Revelar from '../components/Revelar'
 import { useRequisicao } from '../hooks/useRequisicao'
@@ -61,23 +62,7 @@ export default function Home() {
 
   return (
     <>
-      {/* Hero: por enquanto só o texto e as chamadas; o mapa noturno entra depois */}
-      <section aria-labelledby="titulo-hero" className="pb-24 pt-[calc(76px+4rem)]">
-        <div className={container}>
-          <h1 id="titulo-hero" className="entrar max-w-3xl font-display text-[clamp(2.75rem,6.4vw,5.25rem)] font-black leading-[0.92] tracking-[-0.045em]">
-            Veja a rua antes de pisar nela.
-          </h1>
-          <p className="entrar mt-6 max-w-[28rem] text-lg text-muted sm:text-xl" style={{ '--i': 1 } as CSSProperties}>
-            Rotas a pé com relatos recentes da comunidade, por região. Sem login e sem dar seu nome.
-          </p>
-          <div className="entrar mt-10 flex flex-wrap gap-3" style={{ '--i': 2 } as CSSProperties}>
-            <LinkBotao to="/mapa">Ver o mapa</LinkBotao>
-            <LinkBotao to="/relatos" variante="neutro">
-              Ver relatos
-            </LinkBotao>
-          </div>
-        </div>
-      </section>
+      <HeroRota />
 
       {/* Como funciona: um itinerário de três paradas */}
       <section aria-labelledby="como-funciona" className="pb-24 pt-6 sm:pb-32">

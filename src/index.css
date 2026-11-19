@@ -76,6 +76,45 @@
   --skeleton: #173236;
 }
 
+/* Mapa do hero (tokens --nite-*): acompanha o tema.
+   Claro = a rua vista de dia (névoa e teal profundo); noite = a rua à noite.
+   Contraste medido: texto de apoio 5,6:1 no claro; botão teal profundo com texto branco 6,7:1. */
+:root {
+  --nite-bg: #e9f5f5;
+  --nite-street: #c9e1e1;
+  --nite-avenue: #b5d3d4;
+  --nite-label: #4a6569;
+  --nite-water: #b7dbdd;
+  --nite-park: #bfe0dc;
+  --nite-ink: #10272b;
+  --nite-muted: #4a6569;
+  --nite-panel: #ffffff;
+  --nite-line: #c3dadb;
+  --nite-teal: #0b6670;
+  --nite-on-teal: #ffffff;
+  --nite-alert: #a82633;
+  --nite-alert-text: #a82633;
+  --nite-route-alt: #4a6569;
+}
+
+.dark {
+  --nite-bg: #0b1a1d;
+  --nite-street: #16323a;
+  --nite-avenue: #1e4249;
+  --nite-label: #5e8186;
+  --nite-water: #0c2e36;
+  --nite-park: #0f302e;
+  --nite-ink: #e9f5f5;
+  --nite-muted: #93b0b3;
+  --nite-panel: #10272b;
+  --nite-line: #24474d;
+  --nite-teal: #17a0a8;
+  --nite-on-teal: #04181a;
+  --nite-alert: #e5545f;
+  --nite-alert-text: #f08a92;
+  --nite-route-alt: #6e9599;
+}
+
 @theme inline {
   --color-bg: var(--bg);
   --color-mist: var(--mist);
@@ -106,6 +145,15 @@
   --color-route: var(--route);
   --color-route-alt: var(--route-alt);
   --color-skeleton: var(--skeleton);
+  --color-nite-bg: var(--nite-bg);
+  --color-nite-ink: var(--nite-ink);
+  --color-nite-muted: var(--nite-muted);
+  --color-nite-panel: var(--nite-panel);
+  --color-nite-line: var(--nite-line);
+  --color-nite-teal: var(--nite-teal);
+  --color-nite-on-teal: var(--nite-on-teal);
+  --color-nite-alert: var(--nite-alert);
+  --color-nite-alert-text: var(--nite-alert-text);
 }
 
 @theme {
