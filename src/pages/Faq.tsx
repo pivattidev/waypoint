@@ -112,10 +112,13 @@ export default function Faq() {
 
     <div className="flex flex-col gap-16">
       {grupos.map((g) => (
-      <section key={g.id} id={g.id} aria-labelledby={`titulo-${g.id}`}>
-      <h2 id={`titulo-${g.id}`} className="mb-4 text-lg font-extrabold">
-      {g.titulo}
-    </h2>
+      <section key={g.id} id={g.id} aria-labelledby={`titulo-${g.id}`} 
+      className="grid gap-x-16 gap-y-4 lg:grid-cols-[220px_minmax(0,1fr)]">
+      <h2
+    id={`titulo-${g.id}`}
+    className="text-lg font-extrabold lg:sticky lg:top-28 lg:self-start lg:pt-5">
+    {g.titulo}
+  </h2>
       <div className="border-t border-line">
       {g.perguntas.map((item) => (
       <PerguntaFaq key={item.pergunta} item={item} />
