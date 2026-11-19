@@ -1,10 +1,15 @@
-import { useState, type FormEvent } from 'react'
+import { useState, type CSSProperties, type FormEvent } from 'react'
+import { Link } from 'react-router-dom'
 import Button from '../components/Button'
 import Campo, { AreaTexto, Entrada, Selecao } from '../components/Campo'
 import { Carregando, MensagemErro } from '../components/EstadoTela'
 import PageHeader from '../components/PageHeader'
+import Pin from '../components/Pin'
 import { useRequisicao } from '../hooks/useRequisicao'
+import { mensagemDeErro } from '../services/api'
 import { listarCategorias, listarRegioes } from '../services/regioes'
+import { enviarRelato } from '../services/relatos'
+import type { Relato } from '../types/relato'
 
 interface FormRelato {
   regiaoId: string
@@ -65,13 +70,16 @@ export default function EnviarRelato() {
 
   const [form, setForm] = useState<FormRelato>(vazio)
   const [erros, setErros] = useState<ErrosRelato>({})
+  const [enviando, setEnviando] = useState(false)
+  const [erroEnvio, setErroEnvio] = useState<string | null>(null)
+  const [enviado, setEnviado] = useState<Relato | null>(null)
 
   const atualizar = (campo: CampoForm, valor: string) => {
     setForm((f) => ({ ...f, [campo]: valor }))
     setErros((e) => ({ ...e, [campo]: undefined }))
   }
 
-  const enviar = (evento: FormEvent) => {
+  const enviar = async (evento: FormEvent) => {
     evento.preventDefault()
     const novos = validar(form, todosOsCampos)
     setErros(novos)
@@ -79,6 +87,51 @@ export default function EnviarRelato() {
       focarPrimeiroErro(novos)
       return
     }
+
+    setEnviando(true)
+    setErroEnvio(null)
+    try {
+      const criado = await enviarRelato(Number(form.regiaoId), {
+        categoriaId: Number(form.categoriaId),
+        titulo: form.titulo.trim(),
+        descricao: form.descricao.trim(),
+        logradouro: form.logradouro.trim(),
+        latitude: null,
+        longitude: null,
+        dataOcorrencia: form.dataOcorrencia,
+        tags: form.tags.split(',').map((t) => t.trim().toLowerCase()).filter(Boolean),
+      })
+      setEnviado(criado)
+      setForm(vazio)
+      // A confirmação é curta: volta ao topo para ela aparecer inteira
+      window.scrollTo({ top: 0 })
+    } catch (e) {
+      // Feedback da API (400 de validação, 404 de região...) aparece como veio do Java
+      setErroEnvio(mensagemDeErro(e))
+    } finally {
+      setEnviando(false)
+    }
+  }
+
+  if (enviado) {
+    return (
+      <div className="mx-auto flex max-w-xl flex-col items-center py-16 text-center" role="status">
+        {/* O pin "pousa": resposta à ação de enviar */}
+        <Pin className="pousar size-16" />
+        <h1 className="entrar mt-6 text-[clamp(2.25rem,6vw,3.5rem)] font-extrabold leading-none tracking-[-0.04em]" style={{ '--i': 3 } as CSSProperties}>
+          Relato enviado
+        </h1>
+        <p className="entrar mt-4 text-lg text-muted" style={{ '--i': 4 } as CSSProperties}>
+          Ele aparece no mapa depois da moderação. Nada sobre você foi guardado.
+        </p>
+        <div className="entrar mt-9 flex flex-wrap justify-center gap-3" style={{ '--i': 5 } as CSSProperties}>
+          <Button onClick={() => setEnviado(null)}>Enviar outro relato</Button>
+          <Link to="/mapa" className="inline-flex min-h-11 items-center px-5 font-bold text-link underline-offset-4 hover:underline">
+            Ver o mapa
+          </Link>
+        </div>
+      </div>
+    )
   }
 
   const carregandoListas = regioes.carregando || categorias.carregando
@@ -104,6 +157,11 @@ export default function EnviarRelato() {
 
       {regioes.dados && categorias.dados && (
         <form noValidate onSubmit={enviar} className="grid max-w-3xl gap-6 md:grid-cols-2">
+          {erroEnvio && (
+            <p role="alert" className="rounded-ctl bg-alert-bg px-4 py-3 font-bold text-alert-text md:col-span-2">
+              {erroEnvio}
+            </p>
+          )}
           <Campo id="regiao" rotulo="Região" erro={erros.regiaoId}>
             <Selecao id="regiao" value={form.regiaoId} erro={!!erros.regiaoId} onChange={(e) => atualizar('regiaoId', e.target.value)}>
               <option value="">Selecione</option>
@@ -142,7 +200,9 @@ export default function EnviarRelato() {
             <Entrada id="tags" autoComplete="off" value={form.tags} onChange={(e) => atualizar('tags', e.target.value)} />
           </Campo>
           <div className="md:col-span-2">
-            <Button type="submit">Enviar relato</Button>
+            <Button type="submit" carregando={enviando}>
+              {enviando ? 'Enviando…' : 'Enviar relato'}
+            </Button>
           </div>
         </form>
       )}
