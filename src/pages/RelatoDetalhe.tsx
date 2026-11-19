@@ -3,10 +3,12 @@ import { Link, useParams } from 'react-router-dom'
 import { LinkBotao } from '../components/Button'
 import CategoriaIcone from '../components/CategoriaIcone'
 import { Carregando, ListaVazia, MensagemErro } from '../components/EstadoTela'
+import ItemRelato from '../components/ItemRelato'
 import MapaPrevia from '../components/MapaPrevia'
 import StatusBadge from '../components/StatusBadge'
 import { useRequisicao } from '../hooks/useRequisicao'
-import { buscarRelato } from '../services/relatos'
+import { buscarRelato, listarRelatosDaRegiao } from '../services/relatos'
+import type { Relato } from '../types/relato'
 import { formatarDataHora, tempoDecorrido } from '../utils/formatar'
 
 /** Atalho para escalonar a animação de entrada. */
@@ -31,6 +33,30 @@ function Dado({ rotulo, children }: { rotulo: string; children: ReactNode }) {
       <dt className="text-sm font-bold text-muted">{rotulo}</dt>
       <dd className="mt-1.5 text-[17px] text-ink">{children}</dd>
     </div>
+  )
+}
+
+/** Outros relatos aprovados da mesma região: a página não termina num beco sem saída. */
+function MaisDaRegiao({ relato }: { relato: Relato }) {
+  const { dados } = useRequisicao(() => listarRelatosDaRegiao(relato.regiaoId), [relato.regiaoId])
+  const outros = (dados ?? []).filter((r) => r.id !== relato.id).slice(0, 3)
+  if (outros.length === 0) return null
+
+  return (
+    <section aria-labelledby="mais-regiao" className="mt-20">
+      <div className="entrar flex flex-wrap items-end justify-between gap-4" style={ordem(8)}>
+        <h2 id="mais-regiao" className="text-[clamp(1.5rem,2.5vw,2rem)]">
+          Também em {relato.regiaoNome}
+        </h2>
+      </div>
+      <ul className="mt-4 border-t border-line">
+        {outros.map((r, i) => (
+          <li key={r.id}>
+            <ItemRelato relato={r} indice={9 + i} />
+          </li>
+        ))}
+      </ul>
+    </section>
   )
 }
 
@@ -131,6 +157,8 @@ export default function RelatoDetalhe() {
               </p>
             </aside>
           </div>
+
+          <MaisDaRegiao relato={relato} />
         </>
       )}
     </article>
