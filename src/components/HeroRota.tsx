@@ -22,7 +22,7 @@ export default function HeroRota() {
         <div className="entrar absolute inset-y-0 left-[max(616px,calc(50%-264px))] right-0 -z-10 [contain:strict]" style={{ '--i': 1 } as CSSProperties} aria-hidden>
           {/* Rotas na parte de cima; o painel fica embaixo, sem cobrir nada */}
           <div className="absolute inset-x-0 bottom-[420px] top-[100px]">
-            <MapaNoturno recorte={RECORTE_ROTAS} encaixe="meet" />
+            <MapaNoturno rotaSelecionada="iluminada" recorte={RECORTE_ROTAS} encaixe="meet" />
           </div>
           {/* A borda esquerda do mapa some no fundo: texto e mapa ficam juntos, sem moldura */}
           <div className="absolute inset-y-0 left-0 w-40 bg-gradient-to-r from-nite-bg to-transparent" />
@@ -48,7 +48,11 @@ export default function HeroRota() {
           {!desktop && (
             <div className="entrar mt-8" style={{ '--i': 2 } as CSSProperties}>
               <div className="relative aspect-[4/3] overflow-hidden rounded-mapa border border-nite-line sm:aspect-[16/9] sm:p-6">
-                {celular ? <MapaNoturno recorte="640 40 940 705" /> : <MapaNoturno recorte={RECORTE_ROTAS} encaixe="meet" />}
+                {celular ? (
+                  <MapaNoturno rotaSelecionada="iluminada" recorte="640 40 940 705" />
+                ) : (
+                  <MapaNoturno rotaSelecionada="iluminada" recorte={RECORTE_ROTAS} encaixe="meet" />
+                )}
               </div>
             </div>
           )}
