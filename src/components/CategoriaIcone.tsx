@@ -13,8 +13,8 @@ function simboloDe(nome: string): Simbolo {
     .replace(/[̀-ͯ]/g, '')
     .toLowerCase()
   if (n.includes('ilumina')) return 'luz'
-  if (n.includes('calcada')) return 'calcada'
-  if (n.includes('furto') || n.includes('roubo')) return 'furto'
+  if (n.includes('calcada') || n.includes('esburac') || n.includes('rampa')) return 'calcada'
+  if (n.includes('furto') || n.includes('roubo') || n.includes('assalto')) return 'furto'
   if (n.includes('assedio')) return 'assedio'
   if (n.includes('desert')) return 'deserta'
   if (n.includes('obra') || n.includes('bloqueio')) return 'obra'
