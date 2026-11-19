@@ -6,7 +6,15 @@ function Foto({ pessoa }: { pessoa: Integrante }) {
   if (pessoa.foto) {
     return <img src={pessoa.foto} width={88} height={88} loading="lazy" alt={`Foto de ${pessoa.nome}`} className="size-[88px] shrink-0 rounded-full object-cover" />
   }
-  return null
+  return (
+    <span className="grid size-[88px] shrink-0 place-items-center rounded-full bg-tealbg font-display text-3xl font-extrabold text-link" aria-hidden>
+      {pessoa.nome
+        .split(' ')
+        .map((p) => p[0])
+        .slice(0, 2)
+        .join('')}
+    </span>
+  )
 }
 
 export default function Integrantes() {
