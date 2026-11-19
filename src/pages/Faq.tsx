@@ -1,5 +1,6 @@
 import PageHeader from '../components/PageHeader'
 import { Link } from 'react-router-dom'
+import Revelar from '../components/Revelar'
 
 // Define os campos de cada pergunta
 interface Pergunta {
@@ -113,7 +114,7 @@ export default function Faq() {
 
     <div className="flex flex-col gap-16">
       {grupos.map((g) => (
-      <section key={g.id} id={g.id} aria-labelledby={`titulo-${g.id}`} 
+      <Revelar key={g.id}  como="section" id={g.id} aria-labelledby={`titulo-${g.id}`} 
       className="grid gap-x-16 gap-y-4 lg:grid-cols-[220px_minmax(0,1fr)]">
       <h2
     id={`titulo-${g.id}`}
@@ -125,9 +126,9 @@ export default function Faq() {
       <PerguntaFaq key={item.pergunta} item={item} />
     ))}
   </div>
-    </section>
+    </Revelar>
     ))}
-      <div className="grid gap-x-16 gap-y-2 border-t border-line pt-10 lg:grid-cols-[220px_minmax(0,1fr)]">
+      <Revelar className="grid gap-x-16 gap-y-2 border-t border-line pt-10 lg:grid-cols-[220px_minmax(0,1fr)]">
       <p className="text-lg font-extrabold">Não achou?</p>
       <p className="text-[17px] text-muted">
         Envie sua dúvida para a equipe pela página de{' '}
@@ -137,7 +138,7 @@ export default function Faq() {
         contato
         </Link>.
         </p>
-      </div>
+      </Revelar>
     </div>
   </>  
   )
