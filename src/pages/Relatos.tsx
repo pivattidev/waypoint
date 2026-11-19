@@ -1,6 +1,6 @@
-import { Link } from 'react-router-dom'
 import { LinkBotao } from '../components/Button'
 import { Carregando, ListaVazia, MensagemErro } from '../components/EstadoTela'
+import ItemRelato from '../components/ItemRelato'
 import PageHeader from '../components/PageHeader'
 import { useRequisicao } from '../hooks/useRequisicao'
 import { listarRelatos } from '../services/relatos'
@@ -27,14 +27,9 @@ export default function Relatos() {
 
       {filtrados.length > 0 && (
         <ul className="border-t border-line">
-          {filtrados.map((r) => (
-            <li key={r.id} className="border-b border-line py-5">
-              <Link to={`/relatos/${r.id}`} className="font-display text-[1.2rem] font-bold hover:text-link hover:underline">
-                {r.titulo}
-              </Link>
-              <p className="mt-1 text-[15px] text-muted">
-                {r.categoriaNome}, {r.logradouro}, {r.regiaoNome}
-              </p>
+          {filtrados.map((r, i) => (
+            <li key={r.id}>
+              <ItemRelato relato={r} indice={i} />
             </li>
           ))}
         </ul>
