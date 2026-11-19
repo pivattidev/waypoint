@@ -4,10 +4,31 @@ import { LinkBotao } from '../components/Button'
 
 const ordem = (i: number) => ({ '--i': i }) as CSSProperties
 
-/** 404: conteúdo centralizado e três caminhos de volta. */
+/**
+ * Elemento criativo da 404: uma rota que atravessa a página inteira e termina numa barreira (rua sem saída).
+ * O ponto de partida e a barreira são HTML; só a linha é SVG, para o traço não deformar em telas largas.
+ */
+function RotaSemSaida() {
+  return (
+    <div className="flex items-center gap-3" aria-hidden>
+      <span className="size-5 shrink-0 rounded-full border-4 border-ink bg-bg" />
+      <svg viewBox="0 0 1000 12" preserveAspectRatio="none" className="h-3 flex-1">
+        <path d="M0 6 H1000" fill="none" stroke="var(--route)" strokeWidth="4" strokeLinecap="round" pathLength={1} className="rota-tracada" />
+      </svg>
+      {/* Barreira: surge quando a rota chega */}
+      <span className="pousar h-14 w-2.5 shrink-0 rounded-full bg-alert" style={{ animationDelay: '1.6s' }} />
+    </div>
+  )
+}
+
+/** 404: conteúdo centralizado e a rota sem saída de ponta a ponta. */
 export default function NaoEncontrada() {
   return (
     <div className="flex min-h-[64dvh] flex-col justify-center gap-14 py-6">
+      <div className="entrar" style={ordem(0)}>
+        <RotaSemSaida />
+      </div>
+
       <div className="flex flex-col items-center text-center">
         <p className="tabular entrar text-sm font-bold text-muted" style={ordem(1)}>
           Erro 404
