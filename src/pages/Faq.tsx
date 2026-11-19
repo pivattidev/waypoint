@@ -1,4 +1,5 @@
 import PageHeader from '../components/PageHeader'
+import { Link } from 'react-router-dom'
 
 // Define os campos de cada pergunta
 interface Pergunta {
@@ -125,8 +126,19 @@ export default function Faq() {
     ))}
   </div>
     </section>
-        ))}
+    ))}
+      <div className="grid gap-x-16 gap-y-2 border-t border-line pt-10 lg:grid-cols-[220px_minmax(0,1fr)]">
+      <p className="text-lg font-extrabold">Não achou?</p>
+      <p className="text-[17px] text-muted">
+        Envie sua dúvida para a equipe pela página de{' '}
+        <Link
+        to="/contato"
+        className="font-bold text-link underline underline-offset-4">
+        contato
+        </Link>.
+        </p>
       </div>
-    </>  
+    </div>
+  </>  
   )
 }
