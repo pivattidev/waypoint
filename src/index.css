@@ -244,6 +244,35 @@
   }
 }
 
+/* ---------- A rota se desenha (hero e 404) e os postes acendem ---------- */
+@keyframes tracar {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes acender {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.rota-tracada {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  animation: tracar 1.6s cubic-bezier(0.65, 0, 0.35, 1) 0.2s both;
+}
+
+.poste-aceso {
+  animation: acender 0.6s ease-out both;
+}
+
 /* Pulso do relato em foco (responde ao usuário: hover/seleção). */
 @keyframes pulso {
   0% {
