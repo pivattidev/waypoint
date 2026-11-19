@@ -5,6 +5,7 @@ import Campo, { AreaTexto, Entrada, Selecao } from '../components/Campo'
 import { Carregando, MensagemErro } from '../components/EstadoTela'
 import PageHeader from '../components/PageHeader'
 import Pin from '../components/Pin'
+import TracoRota, { type EstadoMarco, type Marco } from '../components/TracoRota'
 import { useRequisicao } from '../hooks/useRequisicao'
 import { mensagemDeErro } from '../services/api'
 import { listarCategorias, listarRegioes } from '../services/regioes'
@@ -169,6 +170,9 @@ export default function EnviarRelato() {
   const carregandoListas = regioes.carregando || categorias.carregando
   const erroListas = regioes.erro ?? categorias.erro
 
+  const estadoDe = (i: number): EstadoMarco => (i < indice ? 'feito' : i === indice ? 'atual' : 'proximo')
+  const marcos: Marco[] = ETAPAS.map((e, i) => ({ id: e.id, estado: estadoDe(i), titulo: e.titulo }))
+
   const nomeRegiao = regioes.dados?.find((r) => String(r.id) === form.regiaoId)?.nome
   const nomeCategoria = categorias.dados?.find((c) => String(c.id) === form.categoriaId)?.nome
 
@@ -193,6 +197,11 @@ export default function EnviarRelato() {
       {regioes.dados && categorias.dados && (
         <div className="grid gap-14 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] xl:gap-20">
           <div className="min-w-0">
+            {/* Itinerário das 4 etapas: uma trilha fina acima do formulário */}
+            <nav aria-label="Etapas do relato" className="entrar mb-12 max-w-xl" style={{ '--i': 3 } as CSSProperties}>
+              <TracoRota marcos={marcos} onEscolher={(id) => setEtapa(id as Etapa)} />
+            </nav>
+
             <form noValidate onSubmit={enviar} className="flex min-w-0 flex-col">
               <h2 key={'titulo-' + etapa} className="entrar text-[clamp(1.75rem,3vw,2.25rem)] leading-tight">
                 {etapa === 'onde' && 'Onde aconteceu?'}
