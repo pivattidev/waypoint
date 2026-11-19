@@ -1,7 +1,12 @@
 import type { CSSProperties } from 'react'
+import { Link } from 'react-router-dom'
 import { LinkBotao } from '../components/Button'
+import { Carregando, ListaVazia, MensagemErro } from '../components/EstadoTela'
+import ItemRelato from '../components/ItemRelato'
 import Pin from '../components/Pin'
 import Revelar from '../components/Revelar'
+import { useRequisicao } from '../hooks/useRequisicao'
+import { listarRelatos } from '../services/relatos'
 
 /** Como funciona: é uma sequência de verdade, então cada passo é uma parada da rota. */
 const paradas = [
@@ -48,6 +53,9 @@ function Itinerario() {
 }
 
 export default function Home() {
+  const { dados: relatos, carregando, erro, recarregar } = useRequisicao(() => listarRelatos('APROVADO'), [])
+  const recentes = (relatos ?? []).slice().sort((a, b) => b.dataOcorrencia.localeCompare(a.dataOcorrencia)).slice(0, 4)
+
   return (
     <>
       {/* Hero: por enquanto só o texto e as chamadas; o mapa noturno entra depois */}
@@ -80,6 +88,40 @@ export default function Home() {
             </p>
           </Revelar>
           <Itinerario />
+        </div>
+      </section>
+
+      {/* Relatos recentes: a mesma lista enxuta da página Relatos */}
+      <section aria-labelledby="recentes" className="pb-24 sm:pb-32">
+        <div className={`${container} grid gap-12 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-16`}>
+          <div className="min-w-0">
+            <Revelar className="mb-6 flex flex-wrap items-end justify-between gap-4">
+              <h2 id="recentes" className="text-[clamp(2rem,3.6vw,3rem)] font-extrabold leading-[1.02] tracking-[-0.035em]">
+                Visto nos últimos dias
+              </h2>
+              <Link to="/relatos" className="inline-flex min-h-11 items-center font-bold text-link underline-offset-4 hover:underline">
+                Ver todos os relatos
+              </Link>
+            </Revelar>
+
+            {carregando && <Carregando texto="Buscando relatos" />}
+            {erro && <MensagemErro titulo="Não foi possível carregar os relatos" mensagem={erro.message} onTentarNovamente={recarregar} />}
+            {relatos && relatos.length === 0 && (
+              <ListaVazia titulo="Nenhum relato publicado ainda.">
+                <p className="mb-4">Passou por algo que outras pessoas deveriam saber?</p>
+                <LinkBotao to="/enviar-relato">Enviar relato</LinkBotao>
+              </ListaVazia>
+            )}
+            {recentes.length > 0 && (
+              <ul className="border-t border-line">
+                {recentes.map((r, i) => (
+                  <li key={r.id}>
+                    <ItemRelato relato={r} indice={i} />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
       </section>
     </>
