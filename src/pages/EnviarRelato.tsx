@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import Button from '../components/Button'
 import Campo, { AreaTexto, Entrada, Selecao } from '../components/Campo'
 import { Carregando, MensagemErro } from '../components/EstadoTela'
+import NotaAnonimato from '../components/NotaAnonimato'
 import PageHeader from '../components/PageHeader'
 import Pin from '../components/Pin'
 import TracoRota, { type EstadoMarco, type Marco } from '../components/TracoRota'
@@ -319,6 +320,14 @@ export default function EnviarRelato() {
               </div>
             </form>
           </div>
+
+          {/* Anonimato: nota leve, separada só por uma linha (sem caixa) */}
+          <aside
+            className="entrar border-t border-line pt-8 xl:sticky xl:top-28 xl:self-start xl:border-l xl:border-t-0 xl:pl-12 xl:pt-0"
+            style={{ '--i': 4 } as CSSProperties}
+          >
+            <NotaAnonimato />
+          </aside>
         </div>
       )}
     </>
