@@ -3,6 +3,9 @@ import Button from '../components/Button'
 import Campo, { AreaTexto, Entrada } from '../components/Campo'
 import PageHeader from '../components/PageHeader'
 
+// TODO: trocar pelo e-mail oficial do grupo. A API Java não tem endpoint de contato.
+const EMAIL_CONTATO = 'contato.waypoint@exemplo.com'
+
 interface FormContato {
   nome: string
   email: string
@@ -24,6 +27,7 @@ function validar(form: FormContato): ErrosContato {
 export default function Contato() {
   const [form, setForm] = useState<FormContato>(vazio)
   const [erros, setErros] = useState<ErrosContato>({})
+  const [linkGmail, setLinkGmail] = useState('')
 
   const atualizar = (campo: keyof FormContato, valor: string) => {
     setForm((f) => ({ ...f, [campo]: valor }))
@@ -40,6 +44,16 @@ export default function Contato() {
       document.getElementById(primeiro)?.focus()
       return
     }
+
+    const assunto = encodeURIComponent(`Contato pelo site WayPoint: ${form.nome.trim()}`)
+    const corpo = encodeURIComponent(`${form.mensagem.trim()}\n\nResponder para: ${form.email.trim()}`)
+
+    // Alternativa para quem não tem app de e-mail configurado: abre o Gmail no navegador
+    setLinkGmail(
+      `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(EMAIL_CONTATO)}&su=${assunto}&body=${corpo}`,
+    )
+
+    window.location.href = `mailto:${EMAIL_CONTATO}?subject=${assunto}&body=${corpo}`
   }
 
   return (
@@ -61,6 +75,15 @@ export default function Contato() {
         <Button type="submit" className="mt-2 self-start">
           Escrever e-mail
         </Button>
+
+        {linkGmail && (
+          <p className="text-sm">
+            O e-mail não abriu?{' '}
+            <a href={linkGmail} target="_blank" rel="noreferrer" className="underline">
+              Abrir no Gmail
+            </a>
+          </p>
+        )}
       </form>
     </>
   )
