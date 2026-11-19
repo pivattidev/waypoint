@@ -1,7 +1,9 @@
 import type { CSSProperties } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { LinkBotao } from '../components/Button'
+import CategoriaIcone from '../components/CategoriaIcone'
 import { Carregando, ListaVazia, MensagemErro } from '../components/EstadoTela'
+import StatusBadge from '../components/StatusBadge'
 import { useRequisicao } from '../hooks/useRequisicao'
 import { buscarRelato } from '../services/relatos'
 
@@ -54,9 +56,16 @@ export default function RelatoDetalhe() {
       {relato && !carregando && (
         <>
           <div className="grid gap-12 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-20">
-            {/* Leitura: título e descrição */}
+            {/* Leitura: categoria, título e descrição */}
             <div className="min-w-0">
-              <h1 className="entrar max-w-3xl text-[clamp(2.25rem,4.5vw,3.5rem)] font-extrabold leading-[1] tracking-[-0.035em]" style={ordem(1)}>
+              <p className="entrar flex flex-wrap items-center gap-x-4 gap-y-2" style={ordem(0)}>
+                <span className="inline-flex items-center gap-2 text-[15px] font-bold text-alert-text">
+                  <CategoriaIcone nome={relato.categoriaNome} className="size-4" />
+                  {relato.categoriaNome}
+                </span>
+                <StatusBadge status={relato.status} />
+              </p>
+              <h1 className="entrar mt-5 max-w-3xl text-[clamp(2.25rem,4.5vw,3.5rem)] font-extrabold leading-[1] tracking-[-0.035em]" style={ordem(1)}>
                 {relato.titulo}
               </h1>
               <p className="entrar mt-6 max-w-2xl text-xl leading-relaxed text-ink-2" style={ordem(2)}>
