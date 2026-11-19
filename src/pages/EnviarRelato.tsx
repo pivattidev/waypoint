@@ -1,4 +1,4 @@
-import { useState, type CSSProperties, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type CSSProperties, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import Button from '../components/Button'
 import Campo, { AreaTexto, Entrada, Selecao } from '../components/Campo'
@@ -86,8 +86,19 @@ export default function EnviarRelato() {
   const [enviando, setEnviando] = useState(false)
   const [erroEnvio, setErroEnvio] = useState<string | null>(null)
   const [enviado, setEnviado] = useState<Relato | null>(null)
+  const tituloEtapa = useRef<HTMLHeadingElement>(null)
+  const primeiraRender = useRef(true)
 
   const indice = ETAPAS.findIndex((e) => e.id === etapa)
+
+  // Ao trocar de etapa, o foco vai para o título dela (quem usa leitor de tela sabe onde está)
+  useEffect(() => {
+    if (primeiraRender.current) {
+      primeiraRender.current = false
+      return
+    }
+    tituloEtapa.current?.focus()
+  }, [etapa])
 
   const atualizar = (campo: CampoForm, valor: string) => {
     setForm((f) => ({ ...f, [campo]: valor }))
@@ -203,7 +214,7 @@ export default function EnviarRelato() {
             </nav>
 
             <form noValidate onSubmit={enviar} className="flex min-w-0 flex-col">
-              <h2 key={'titulo-' + etapa} className="entrar text-[clamp(1.75rem,3vw,2.25rem)] leading-tight">
+              <h2 key={'titulo-' + etapa} ref={tituloEtapa} tabIndex={-1} className="entrar text-[clamp(1.75rem,3vw,2.25rem)] leading-tight outline-none">
                 {etapa === 'onde' && 'Onde aconteceu?'}
                 {etapa === 'oque' && 'O que aconteceu?'}
                 {etapa === 'quando' && 'Quando aconteceu?'}
@@ -275,14 +286,19 @@ export default function EnviarRelato() {
                 {etapa === 'revisar' && (
                   <dl className="divide-y divide-line border-y border-line md:col-span-2">
                     {[
-                      { rotulo: 'Onde', valor: `${form.logradouro}, ${nomeRegiao ?? ''}` },
-                      { rotulo: 'O quê', valor: `${nomeCategoria ?? ''}: ${form.titulo}` },
-                      { rotulo: 'Descrição', valor: form.descricao },
-                      { rotulo: 'Quando', valor: form.dataOcorrencia ? formatarDataHora(form.dataOcorrencia) : '' },
+                      { rotulo: 'Onde', valor: `${form.logradouro}, ${nomeRegiao ?? ''}`, etapa: 'onde' as Etapa },
+                      { rotulo: 'O quê', valor: `${nomeCategoria ?? ''}: ${form.titulo}`, etapa: 'oque' as Etapa },
+                      { rotulo: 'Descrição', valor: form.descricao, etapa: 'oque' as Etapa },
+                      { rotulo: 'Quando', valor: form.dataOcorrencia ? formatarDataHora(form.dataOcorrencia) : '', etapa: 'quando' as Etapa },
                     ].map((item) => (
-                      <div key={item.rotulo} className="py-4">
-                        <dt className="text-sm font-bold text-muted">{item.rotulo}</dt>
-                        <dd className="mt-1 [overflow-wrap:anywhere]">{item.valor}</dd>
+                      <div key={item.rotulo} className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4 py-4">
+                        <div className="min-w-0">
+                          <dt className="text-sm font-bold text-muted">{item.rotulo}</dt>
+                          <dd className="mt-1 [overflow-wrap:anywhere]">{item.valor}</dd>
+                        </div>
+                        <button type="button" onClick={() => setEtapa(item.etapa)} className="min-h-11 px-2 font-bold text-link underline-offset-4 hover:underline">
+                          Alterar<span className="sr-only"> {item.rotulo.toLowerCase()}</span>
+                        </button>
                       </div>
                     ))}
                   </dl>
