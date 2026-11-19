@@ -1,26 +1,44 @@
+import type { CategoriaJava, RelatoJava, TrechoJava } from '../types/java'
 import type { ModeracaoRelato, NovoRelato, Relato, StatusRelato } from '../types/relato'
+import { relatoDoJava } from '../utils/conversaoJava'
+import { requisicao } from './api'
 import { categoriasMock, regioesMock } from './mock/dados'
 import { bancoMock, falhar, responder } from './mock/servidor'
+import { REGIOES } from './regioes'
 
-/** GET /relatos?status= */
-export function listarRelatos(status?: StatusRelato): Promise<Relato[]> {
-  return responder(bancoMock.relatos.filter((r) => !status || r.status === status))
+/**
+ * O GET /relato devolve trecho e categoria só com o id. Então buscamos as três listas
+ * ao mesmo tempo (Promise.all) e juntamos tudo no formato que as páginas usam.
+ */
+async function buscarTodos(): Promise<Relato[]> {
+  const [relatos, trechos, categorias] = await Promise.all([
+    requisicao<RelatoJava[]>('/relato'),
+    requisicao<TrechoJava[]>('/trecho'),
+    requisicao<CategoriaJava[]>('/categoria'),
+  ])
+  return relatos.map((r) => relatoDoJava(r, trechos, categorias, REGIOES))
 }
 
-/** GET /regioes/{id}/relatos?status=APROVADO */
-export function listarRelatosDaRegiao(regiaoId: number, status: StatusRelato = 'APROVADO'): Promise<Relato[]> {
-  const caminho = `/regioes/${regiaoId}/relatos`
-  if (!regioesMock.some((g) => g.id === regiaoId)) {
-    return falhar(404, 'Não encontrado', 'Região não encontrada.', caminho)
-  }
-  return responder(bancoMock.relatos.filter((r) => r.regiaoId === regiaoId && r.status === status))
+/** GET /relato. O Java devolve todos; o filtro por status é feito aqui. */
+export async function listarRelatos(status?: StatusRelato): Promise<Relato[]> {
+  const todos = await buscarTodos()
+  return todos.filter((r) => !status || r.status === status)
 }
 
-/** GET /relatos/{id} */
-export function buscarRelato(id: number): Promise<Relato> {
-  const encontrado = bancoMock.relatos.find((r) => r.id === id)
-  if (!encontrado) return falhar(404, 'Não encontrado', 'Relato não encontrado.', `/relatos/${id}`)
-  return responder(encontrado)
+/** Relatos de uma região (bairro do trecho), só os aprovados por padrão. */
+export async function listarRelatosDaRegiao(regiaoId: number, status: StatusRelato = 'APROVADO'): Promise<Relato[]> {
+  const todos = await buscarTodos()
+  return todos.filter((r) => r.regiaoId === regiaoId && r.status === status)
+}
+
+/** GET /relato/{id}, depois o trecho e a categoria dele. */
+export async function buscarRelato(id: number): Promise<Relato> {
+  const relato = await requisicao<RelatoJava>(`/relato/${id}`)
+  const [trecho, categoria] = await Promise.all([
+    requisicao<TrechoJava>(`/trecho/${relato.trecho.idTrecho}`),
+    requisicao<CategoriaJava>(`/categoria/${relato.categoria.idCategoria}`),
+  ])
+  return relatoDoJava(relato, [trecho], [categoria], REGIOES)
 }
 
 /** POST /regioes/{id}/relatos → 201 */
