@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { NavLink } from 'react-router-dom'
+import { LinkBotao } from './Button'
 import Logo from './Logo'
 import ThemeToggle from './ThemeToggle'
 
@@ -68,6 +69,11 @@ export default function Header() {
 
         <div className="ml-auto flex items-center gap-2">
           <ThemeToggle />
+          <div className="hidden sm:block">
+            <LinkBotao to="/enviar-relato" variante="primario">
+              Enviar relato
+            </LinkBotao>
+          </div>
           <button
             type="button"
             className="grid size-11 place-items-center rounded-ctl text-ink hover:bg-tealbg xl:hidden"
@@ -96,6 +102,11 @@ export default function Header() {
               {link.rotulo}
             </NavLink>
           ))}
+          <div className="mt-4 sm:hidden">
+            <LinkBotao to="/enviar-relato" variante="primario" className="w-full">
+              Enviar relato
+            </LinkBotao>
+          </div>
         </nav>
       )}
     </header>
