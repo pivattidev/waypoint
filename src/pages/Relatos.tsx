@@ -53,7 +53,18 @@ export default function Relatos() {
 
   return (
     <>
-      <PageHeader titulo="Relatos" marco="pin">
+      <PageHeader
+        titulo="Relatos"
+        marco="pin"
+        lateral={
+          relatos.dados && (
+            <p className="lg:text-right" aria-live="polite">
+              <span className="tabular block font-display text-5xl font-extrabold leading-none tracking-[-0.04em]">{filtrados.length}</span>
+              <span className="mt-1 block text-sm font-bold text-muted">{filtrados.length === 1 ? 'relato aprovado' : 'relatos aprovados'}</span>
+            </p>
+          )
+        }
+      >
         <p>Tudo o que passou pela moderação, do mais recente para o mais antigo.</p>
       </PageHeader>
 
