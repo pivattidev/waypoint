@@ -4,6 +4,7 @@ import { LinkBotao } from '../components/Button'
 import { Carregando, ListaVazia, MensagemErro } from '../components/EstadoTela'
 import ItemRelato from '../components/ItemRelato'
 import MapaPrevia from '../components/MapaPrevia'
+import NotaAnonimato from '../components/NotaAnonimato'
 import Pin from '../components/Pin'
 import Revelar from '../components/Revelar'
 import { useRequisicao } from '../hooks/useRequisicao'
@@ -133,6 +134,31 @@ export default function Home() {
               </div>
             </Revelar>
           )}
+        </div>
+      </section>
+
+      {/* Anonimato e moderação: mostrar em vez de prometer */}
+      <section aria-labelledby="anonimo" className="pb-28 sm:pb-36">
+        <div className={`${container} grid items-start gap-12 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-16`}>
+          <Revelar>
+            <h2 id="anonimo" className="max-w-2xl text-[clamp(2.25rem,4.5vw,3.75rem)] font-extrabold leading-[0.98] tracking-[-0.04em]">
+              Ninguém fica sabendo quem relatou.
+            </h2>
+            <p className="mt-6 max-w-xl text-lg text-muted">
+              O relato não guarda nome, e-mail nem IP. O anonimato está no próprio banco de dados, não numa promessa. E nada
+              entra no mapa sem passar pela moderação antes.
+            </p>
+            <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
+              <LinkBotao to="/enviar-relato">Enviar relato</LinkBotao>
+              <Link to="/faq" className="inline-flex min-h-11 items-center font-bold text-link underline-offset-4 hover:underline">
+                Perguntas sobre anonimato
+              </Link>
+            </div>
+          </Revelar>
+          {/* A nota leve (a mesma do envio), separada só por uma linha */}
+          <Revelar indice={1} className="border-t border-line pt-8 lg:border-l lg:border-t-0 lg:pl-12 lg:pt-2">
+            <NotaAnonimato comTitulo={false} />
+          </Revelar>
         </div>
       </section>
     </>
