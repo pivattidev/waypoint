@@ -25,6 +25,34 @@ const perguntas: Pergunta[] = [
   },
 ]
 
+// Componente reutilizado para mostrar cada pergunta
+function PerguntaFaq({ item }: { item: Pergunta }) {
+  return (
+    <details className="group border-b border-line">
+      <summary className="flex min-h-16 cursor-pointer items-center justify-between gap-6 py-5 text-lg font-bold transition-colors hover:text-link">
+        {item.pergunta}
+
+        {/* O sinal de + gira quando a pergunta está aberta */}
+        <svg
+          viewBox="0 0 24 24"
+          className="size-5 shrink-0 text-muted transition-transform duration-200 group-open:rotate-45 group-open:text-link"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.2"
+          strokeLinecap="round"
+          aria-hidden="true"
+        >
+          <path d="M12 5v14M5 12h14" />
+        </svg>
+      </summary>
+
+      <p className="resposta max-w-3xl pb-6 pr-10 text-[17px] leading-relaxed text-muted">
+        {item.resposta}
+      </p>
+    </details>
+  )
+}
+
 export default function Faq() {
   return (
     <>
@@ -33,17 +61,9 @@ export default function Faq() {
           Toque numa pergunta para ver a resposta.</p>
     </PageHeader>
 
-    <div className="border-t border-line">
+          <div className="border-t border-line">
         {perguntas.map((item) => (
-          <details key={item.pergunta} className="border-b border-line">
-            <summary className="cursor-pointer py-5 text-lg font-bold">
-              {item.pergunta}
-            </summary>
-
-            <p className="resposta max-w-3xl pb-6 text-[17px] leading-relaxed text-muted">
-              {item.resposta}
-            </p>
-          </details>
+          <PerguntaFaq key={item.pergunta} item={item} />
         ))}
       </div>
     </>  
