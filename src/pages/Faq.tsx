@@ -6,22 +6,71 @@ interface Pergunta {
   resposta: string
 }
 
+interface GrupoFaq {
+  id: string
+  titulo: string
+  perguntas: Pergunta[]
+}
+
 // Perguntas iniciais do FAQ
-const perguntas: Pergunta[] = [
-  {
-    pergunta: 'O que eu não devo escrever no relato?',
-    resposta:
-      'Evite nomes, placas de veículos e informações que identifiquem pessoas. Descreva as condições do local e o problema encontrado.',
+const grupos: GrupoFaq[] = [
+    {
+    id: 'relatos',
+    titulo: 'Envio de relatos',
+    perguntas: [
+      {
+        pergunta: 'O que eu não devo escrever no relato?',
+        resposta:
+          'Evite nomes, placas de veículos e informações que identifiquem pessoas. Descreva as condições do local e o problema encontrado.',
+      },
+      {
+        pergunta: 'Como escrever um relato útil?',
+        resposta:
+          'Informe o local e descreva o problema com clareza, como um poste apagado, uma calçada danificada ou um bloqueio na passagem.',
+      },
+      {
+        pergunta: 'Para que servem os relatos?',
+        resposta:
+          'Os relatos ajudam outros pedestres a conhecer as condições dos caminhos e a planejar seus trajetos.',
+      },
+    ],
   },
   {
-    pergunta: 'Como escrever um relato útil?',
-    resposta:
-      'Informe o local e descreva o problema com clareza, como um poste apagado, uma calçada danificada ou um bloqueio na passagem.',
+    id: 'moderacao',
+    titulo: 'Moderação',
+    perguntas: [
+      {
+        pergunta: 'Por que meu relato pode não aparecer no mapa?',
+        resposta:
+          'O relato pode estar aguardando análise da moderação. Confira também se os filtros do mapa permitem mostrar esse tipo de ocorrência.',
+      },
+      {
+        pergunta: 'Como evitar problemas na análise do relato?',
+        resposta:
+          'Descreva uma situação relacionada ao trajeto de pedestres, com informações claras sobre o local e sem expor outras pessoas.',
+      },
+    ],
   },
   {
-    pergunta: 'Para que servem os relatos?',
-    resposta:
-      'Os relatos ajudam outros pedestres a conhecer as condições dos caminhos e a planejar seus trajetos.',
+    id: 'uso',
+    titulo: 'Uso do mapa',
+    perguntas: [
+      {
+        pergunta: 'Como consultar as informações de um local?',
+        resposta:
+          'Acesse a página do mapa e consulte os relatos disponíveis na região do seu trajeto.',
+      },
+      {
+        pergunta: 'Um relato descreve a situação atual da rua?',
+        resposta:
+          'As condições do local podem mudar. Confira a data do relato e considere outras informações disponíveis antes de escolher seu caminho.',
+      },
+      {
+        pergunta: 'O que significa uma região sem relatos?',
+        resposta:
+          'Significa que não há relatos disponíveis para aquela região na consulta. Isso não garante que o local esteja livre de problemas.',
+      },
+    ],
   },
 ]
 
@@ -61,9 +110,18 @@ export default function Faq() {
           Toque numa pergunta para ver a resposta.</p>
     </PageHeader>
 
-          <div className="border-t border-line">
-        {perguntas.map((item) => (
-          <PerguntaFaq key={item.pergunta} item={item} />
+    <div className="flex flex-col gap-16">
+      {grupos.map((g) => (
+      <section key={g.id} id={g.id} aria-labelledby={`titulo-${g.id}`}>
+      <h2 id={`titulo-${g.id}`} className="mb-4 text-lg font-extrabold">
+      {g.titulo}
+    </h2>
+      <div className="border-t border-line">
+      {g.perguntas.map((item) => (
+      <PerguntaFaq key={item.pergunta} item={item} />
+    ))}
+  </div>
+    </section>
         ))}
       </div>
     </>  
