@@ -1,8 +1,9 @@
-import type { CSSProperties } from 'react'
+import { useState, type CSSProperties } from 'react'
 import { Link } from 'react-router-dom'
 import { LinkBotao } from '../components/Button'
 import { Carregando, ListaVazia, MensagemErro } from '../components/EstadoTela'
 import ItemRelato from '../components/ItemRelato'
+import MapaPrevia from '../components/MapaPrevia'
 import Pin from '../components/Pin'
 import Revelar from '../components/Revelar'
 import { useRequisicao } from '../hooks/useRequisicao'
@@ -54,6 +55,7 @@ function Itinerario() {
 
 export default function Home() {
   const { dados: relatos, carregando, erro, recarregar } = useRequisicao(() => listarRelatos('APROVADO'), [])
+  const [focoId, setFocoId] = useState<number | null>(null)
   const recentes = (relatos ?? []).slice().sort((a, b) => b.dataOcorrencia.localeCompare(a.dataOcorrencia)).slice(0, 4)
 
   return (
@@ -91,7 +93,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Relatos recentes: a mesma lista enxuta da página Relatos */}
+      {/* Relatos recentes: a mesma lista enxuta da página Relatos, com o mapa ao lado */}
       <section aria-labelledby="recentes" className="pb-24 sm:pb-32">
         <div className={`${container} grid gap-12 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-16`}>
           <div className="min-w-0">
@@ -113,15 +115,24 @@ export default function Home() {
               </ListaVazia>
             )}
             {recentes.length > 0 && (
-              <ul className="border-t border-line">
+              <ul className="border-t border-line" onMouseLeave={() => setFocoId(null)}>
                 {recentes.map((r, i) => (
-                  <li key={r.id}>
+                  <li key={r.id} onMouseEnter={() => setFocoId(r.id)} onFocus={() => setFocoId(r.id)}>
                     <ItemRelato relato={r} indice={i} />
                   </li>
                 ))}
               </ul>
             )}
           </div>
+
+          {/* O mapa acompanha a lista: passar o mouse num relato destaca o pin */}
+          {recentes.length > 0 && (
+            <Revelar indice={1} className="hidden lg:block">
+              <div className="sticky top-28">
+                <MapaPrevia relatos={recentes} selecionadoId={focoId} onSelecionar={setFocoId} />
+              </div>
+            </Revelar>
+          )}
         </div>
       </section>
     </>

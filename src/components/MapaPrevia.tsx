@@ -6,15 +6,49 @@ import CategoriaIcone from './CategoriaIcone'
 import MapaBase from './MapaBase'
 import Pin from './Pin'
 
+/**
+ * Cartão do pin (mapa da Home): surge junto do pin com animação e leva ao relato.
+ * Fica acima do pin quando ele está na metade de baixo do mapa, e abaixo quando está na de cima.
+ */
+function CartaoPin({ relato, x, y }: { relato: Relato; x: number; y: number }) {
+  // Abre AO LADO do pin (direita se o pin está à esquerda, e vice-versa): não cobre os pins vizinhos de cima e de baixo
+  const aDireita = x < 50
+  return (
+    <Link
+      to={`/relatos/${relato.id}`}
+      className={`surgir group absolute z-30 w-60 -translate-y-[calc(50%+1rem)] rounded-painel border border-line bg-panel p-4 shadow-[0_24px_60px_-20px_rgb(0_0_0/0.6)] transition-colors hover:border-teal ${
+        aDireita ? 'translate-x-6' : '-translate-x-[calc(100%+1.5rem)]'
+      }`}
+      style={{ left: `${x}%`, top: `${Math.min(Math.max(y, 22), 80)}%` }}
+    >
+      <span className="flex items-center gap-1.5 text-[13px] font-bold text-alert-text">
+        <CategoriaIcone nome={relato.categoriaNome} className="size-3.5" />
+        {relato.categoriaNome}
+      </span>
+      <span className="mt-1.5 block font-display text-[17px] font-bold leading-snug text-ink">{relato.titulo}</span>
+      <span className="mt-1 block text-[13px] text-muted">
+        {relato.logradouro}, {tempoDecorrido(relato.dataOcorrencia)}
+      </span>
+      <span className="mt-3 inline-flex items-center gap-1.5 text-sm font-bold text-link">
+        Ver relato
+        <svg viewBox="0 0 24 24" className="size-4 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+          <path d="M9 6l6 6-6 6" />
+        </svg>
+      </span>
+    </Link>
+  )
+}
+
 interface MapaPreviaProps {
   relatos: Relato[]
   selecionadoId: number | null
   onSelecionar?: (id: number) => void
   /**
+   * compacto = Home (alto, nome da rua no pin em foco)
    * tela     = /mapa (preenche a altura, com popover do relato)
    * ficha    = detalhe do relato (um pin, sem interação)
    */
-  variante?: 'tela' | 'ficha'
+  variante?: 'compacto' | 'tela' | 'ficha'
   className?: string
 }
 
@@ -58,7 +92,7 @@ function Popover({ relato }: { relato: Relato }) {
  * Posiciona os relatos pela latitude/longitude sobre o fundo ilustrado (MapaBase).
  * Quando o Leaflet for liberado, este componente é o único a trocar: as props continuam as mesmas.
  */
-export default function MapaPrevia({ relatos, selecionadoId, onSelecionar, variante = 'ficha', className = '' }: MapaPreviaProps) {
+export default function MapaPrevia({ relatos, selecionadoId, onSelecionar, variante = 'compacto', className = '' }: MapaPreviaProps) {
   const lats = relatos.map((r) => r.latitude)
   const lngs = relatos.map((r) => r.longitude)
   const margem = 0.004
@@ -77,6 +111,7 @@ export default function MapaPrevia({ relatos, selecionadoId, onSelecionar, varia
   const interativo = variante !== 'ficha' && !!onSelecionar
 
   const tamanhoContainer = {
+    compacto: 'aspect-[4/5]',
     tela: 'h-full min-h-[420px]', // sem moldura: o mapa vai até a borda da tela
     ficha: 'aspect-[4/3]',
   }[variante]
@@ -105,6 +140,7 @@ export default function MapaPrevia({ relatos, selecionadoId, onSelecionar, varia
             key={r.id}
             type="button"
             onClick={() => onSelecionar?.(r.id)}
+            onMouseEnter={variante === 'compacto' ? () => onSelecionar?.(r.id) : undefined}
             style={posicao}
             className={`absolute grid min-h-11 min-w-11 -translate-x-1/2 -translate-y-[85%] place-items-end justify-center transition-transform duration-150 hover:scale-110 ${ativo ? 'z-10' : ''}`}
             aria-label={`${r.titulo}, ${r.logradouro}`}
@@ -115,6 +151,9 @@ export default function MapaPrevia({ relatos, selecionadoId, onSelecionar, varia
           </button>
         )
       })}
+
+      {/* Home: passar o mouse num pin abre um cartão animado e clicável junto dele */}
+      {variante === 'compacto' && selecionado && <CartaoPin key={selecionado.id} relato={selecionado} x={x(selecionado)} y={y(selecionado)} />}
 
       {variante === 'tela' && selecionado && <Popover relato={selecionado} />}
 
