@@ -389,3 +389,17 @@
 details[open] > .resposta {
   animation: entrar 320ms var(--ease-saida) both;
 }
+
+/* 404: a rota se traça até a barreira; a linha de tempo encolhe em 10 s (volta automática ao início) */
+@keyframes encolher {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+.tempo-encolhendo {
+  transform-origin: left;
+  animation: encolher 10s linear both;
+}

@@ -1,7 +1,8 @@
-import type { CSSProperties } from 'react'
-import { Link } from 'react-router-dom'
+import { useEffect, useState, type CSSProperties } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { LinkBotao } from '../components/Button'
 
+const SEGUNDOS = 10
 const ordem = (i: number) => ({ '--i': i }) as CSSProperties
 
 /**
@@ -21,8 +22,22 @@ function RotaSemSaida() {
   )
 }
 
-/** 404: conteúdo centralizado e a rota sem saída de ponta a ponta. */
+/** 404: conteúdo centralizado, a rota sem saída de ponta a ponta e a volta automática para o início. */
 export default function NaoEncontrada() {
+  const navigate = useNavigate()
+  const [restante, setRestante] = useState(SEGUNDOS)
+  const [ficar, setFicar] = useState(false)
+
+  useEffect(() => {
+    if (ficar) return
+    if (restante === 0) {
+      navigate('/', { replace: true })
+      return
+    }
+    const timer = window.setTimeout(() => setRestante((s) => s - 1), 1000)
+    return () => window.clearTimeout(timer)
+  }, [restante, ficar, navigate])
+
   return (
     <div className="flex min-h-[64dvh] flex-col justify-center gap-14 py-6">
       <div className="entrar" style={ordem(0)}>
@@ -50,6 +65,25 @@ export default function NaoEncontrada() {
           <Link to="/relatos" className="inline-flex min-h-11 items-center font-bold text-link underline-offset-4 hover:underline">
             Ver os relatos
           </Link>
+        </div>
+
+        {/* Volta automática: a linha teal encolhe nos 10 segundos */}
+        <div className="entrar mt-14 w-full max-w-xs" style={ordem(5)}>
+          <div className="h-0.5 overflow-hidden rounded-full bg-line" aria-hidden>
+            {!ficar && <div className="tempo-encolhendo h-full bg-teal" />}
+          </div>
+          <p className="tabular mt-3 flex min-h-11 flex-wrap items-center justify-center gap-x-3 text-[15px] text-muted" aria-live="polite">
+            {ficar ? (
+              'Você ficou nesta página.'
+            ) : (
+              <>
+                <span>Levando você ao início em {restante} s.</span>
+                <button type="button" onClick={() => setFicar(true)} className="min-h-11 font-bold text-link underline-offset-4 hover:underline">
+                  Ficar nesta página
+                </button>
+              </>
+            )}
+          </p>
         </div>
       </div>
     </div>
