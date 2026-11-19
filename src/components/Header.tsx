@@ -5,6 +5,7 @@ import ThemeToggle from './ThemeToggle'
 
 const links = [
   { para: '/', rotulo: 'Home' },
+  { para: '/relatos', rotulo: 'Relatos' },
   { para: '/integrantes', rotulo: 'Integrantes' },
   { para: '/sobre', rotulo: 'Sobre' },
   { para: '/faq', rotulo: 'FAQ' },
