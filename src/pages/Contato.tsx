@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { Link } from 'react-router-dom' 
 import Button from '../components/Button'
 import Campo, { AreaTexto, Entrada } from '../components/Campo'
 import PageHeader from '../components/PageHeader'
@@ -65,7 +66,9 @@ export default function Contato() {
         <p>Sugestões, parcerias ou dúvidas sobre o projeto. Respondemos pelo e-mail que você informar.</p>
       </PageHeader>
 
-      <form noValidate onSubmit={enviar} className="flex max-w-3xl flex-col gap-6">
+      {/* Proporção 2/3 + 1/3: o formulário ocupa a maior parte da tela, os canais ficam na lateral */}
+      <div className="grid gap-14 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] xl:gap-20">
+      <form noValidate onSubmit={enviar} className="flex flex-col gap-6">
         {pronto && (
           <p role="status" className="entrar border-l-2 border-teal pl-4 text-ink">
             <strong className="block">Mensagem pronta no seu app de e-mail.</strong>
@@ -94,6 +97,40 @@ export default function Contato() {
           </p>
         )}
       </form>
+      {/* Outros canais: na lateral, separados só por uma linha */}
+        <aside className="border-t border-line pt-8 xl:sticky xl:top-28 xl:self-start xl:border-l xl:border-t-0 xl:pl-12 xl:pt-0">
+          <h2 className="text-xl">Outros canais</h2>
+          <dl className="mt-6 space-y-6 text-[15px]">
+            <div>
+              <dt className="font-bold text-muted">E-mail</dt>
+              <dd className="mt-1">
+                <a href={`mailto:${EMAIL_CONTATO}`} className="font-bold text-link underline-offset-4 hover:underline [overflow-wrap:anywhere]">
+                  {EMAIL_CONTATO}
+                </a>
+              </dd>
+            </div>
+            <div>
+              <dt className="font-bold text-muted">GitHub</dt>
+              {/* TODO: link do repositório público no GitHub */}
+              <dd className="mt-1 text-ink-2">Em breve</dd>
+            </div>
+            <div>
+              <dt className="font-bold text-muted">Relatos de segurança</dt>
+              <dd className="mt-1 text-ink-2">
+                Use o{' '}
+                <Link to="/enviar-relato" className="font-bold text-link underline underline-offset-4">
+                  envio anônimo
+                </Link>
+                , não este formulário.
+              </dd>
+            </div>
+          </dl>
+          <p className="mt-8 flex items-center gap-2.5 text-[15px] font-bold">
+            <span className="size-2 shrink-0 rounded-full bg-alert" aria-hidden />
+            Em emergência, ligue 190.
+          </p>
+        </aside>
+      </div>
     </>
   )
 }
