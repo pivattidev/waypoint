@@ -21,3 +21,18 @@ export function tempoDecorrido(iso: string, agora: Date = new Date()): string {
   const dias = Math.round(horas / 24)
   return dias === 1 ? 'há 1 dia' : `há ${dias} dias`
 }
+
+/** Grupos de recência usados na lista de relatos (uma sequência real de tempo). */
+export const GRUPOS_TEMPO = ['Hoje', 'Ontem', 'Esta semana', 'Antes'] as const
+export type GrupoTempo = (typeof GRUPOS_TEMPO)[number]
+
+export function grupoDeTempo(iso: string, agora: Date = new Date()): GrupoTempo {
+  const data = new Date(iso)
+  const inicioHoje = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate()).getTime()
+  const dia = 24 * 60 * 60 * 1000
+  const t = data.getTime()
+  if (t >= inicioHoje) return 'Hoje'
+  if (t >= inicioHoje - dia) return 'Ontem'
+  if (t >= inicioHoje - 6 * dia) return 'Esta semana'
+  return 'Antes'
+}

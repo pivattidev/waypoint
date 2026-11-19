@@ -7,6 +7,7 @@ import PageHeader from '../components/PageHeader'
 import { useRequisicao } from '../hooks/useRequisicao'
 import { listarCategorias, listarRegioes } from '../services/regioes'
 import { listarRelatos } from '../services/relatos'
+import { grupoDeTempo, GRUPOS_TEMPO } from '../utils/formatar'
 
 /** Lê um id positivo da URL (?tipo=3, ?regiao=2) ou devolve null. */
 function idDaUrl(valor: string | null): number | null {
@@ -41,6 +42,12 @@ export default function Relatos() {
     .filter((r) => categoriaId === null || r.categoriaId === categoriaId)
     .filter((r) => regiaoId === null || r.regiaoId === regiaoId)
     .sort((a, b) => b.dataOcorrencia.localeCompare(a.dataOcorrencia))
+
+  // Agrupa por recência (Hoje, Ontem, Esta semana, Antes): é uma sequência real de tempo
+  const grupos = GRUPOS_TEMPO.map((nome) => ({
+    nome,
+    lista: filtrados.filter((r) => grupoDeTempo(r.dataOcorrencia) === nome),
+  })).filter((grupo) => grupo.lista.length > 0)
 
   const temFiltro = categoriaId !== null || regiaoId !== null
 
@@ -111,15 +118,44 @@ export default function Relatos() {
         </ListaVazia>
       )}
 
-      {filtrados.length > 0 && (
-        <ul className="border-t border-line">
-          {filtrados.map((r, i) => (
-            <li key={r.id}>
-              <ItemRelato relato={r} indice={i} />
-            </li>
-          ))}
-        </ul>
-      )}
+      {/* Grupos de tempo que abrem e fecham (<details> nativo): começa só o mais recente aberto */}
+      <div className="flex flex-col">
+        {grupos.map((grupo, gi) => (
+          <details
+            key={grupo.nome}
+            open={gi === 0}
+            className="entrar group border-t border-line last:border-b"
+            style={{ '--i': 3 + gi } as CSSProperties}
+          >
+            <summary className="flex min-h-16 cursor-pointer items-center gap-3 py-4">
+              <h2 className="text-xl font-extrabold transition-colors group-hover:text-link">{grupo.nome}</h2>
+              <span className="tabular text-sm font-bold text-muted">
+                {grupo.lista.length} {grupo.lista.length === 1 ? 'relato' : 'relatos'}
+              </span>
+              {/* Seta gira ao abrir */}
+              <svg
+                viewBox="0 0 24 24"
+                className="ml-auto size-5 shrink-0 text-muted transition-transform duration-300 group-open:rotate-180 group-hover:text-link"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden
+              >
+                <path d="M6 9l6 6 6-6" />
+              </svg>
+            </summary>
+            <ul className="resposta border-t border-line pb-4">
+              {grupo.lista.map((r, i) => (
+                <li key={r.id}>
+                  <ItemRelato relato={r} indice={i} />
+                </li>
+              ))}
+            </ul>
+          </details>
+        ))}
+      </div>
     </>
   )
 }
