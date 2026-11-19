@@ -1,5 +1,5 @@
 import PageHeader from '../components/PageHeader'
-import { integrantes } from '../services/integrantes'
+import { integrantes } from '../services/Integrantes'
 import type { Integrante } from '../types/Integrante'
 
 const linkClasse =
