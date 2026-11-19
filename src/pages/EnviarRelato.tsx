@@ -21,7 +21,6 @@ interface FormRelato {
   titulo: string
   descricao: string
   dataOcorrencia: string
-  tags: string
 }
 
 type CampoForm = keyof FormRelato
@@ -33,27 +32,42 @@ type Etapa = 'onde' | 'oque' | 'quando' | 'revisar'
 const ETAPAS: { id: Etapa; titulo: string; campos: CampoForm[] }[] = [
   { id: 'onde', titulo: 'Onde', campos: ['regiaoId', 'logradouro'] },
   { id: 'oque', titulo: 'O quê', campos: ['categoriaId', 'titulo', 'descricao'] },
-  { id: 'quando', titulo: 'Quando', campos: ['dataOcorrencia', 'tags'] },
+  { id: 'quando', titulo: 'Quando', campos: ['dataOcorrencia'] },
   { id: 'revisar', titulo: 'Revisar', campos: [] },
 ]
 
-const vazio: FormRelato = { regiaoId: '', logradouro: '', categoriaId: '', titulo: '', descricao: '', dataOcorrencia: '', tags: '' }
+const vazio: FormRelato = { regiaoId: '', logradouro: '', categoriaId: '', titulo: '', descricao: '', dataOcorrencia: '' }
+
+/**
+ * Limites das colunas do banco Oracle (o Java também confere).
+ * Título e descrição vão juntos no campo descricao do Java, que aceita até 100: 25 + 60 cabem com folga.
+ */
+const LIMITE = { logradouro: 30, titulo: 25, descricao: 60 }
+
+/** Hoje no formato aaaa-mm-dd, no fuso do computador (o padrão "sv-SE" escreve a data assim). */
+const hoje = () => new Date().toLocaleDateString('sv-SE')
 
 /** Validação antes de enviar (regra de UX da GS). Devolve só os erros dos campos pedidos. */
 function validar(form: FormRelato, campos: CampoForm[]): ErrosRelato {
   const erros: ErrosRelato = {}
   const checar = (campo: CampoForm) => campos.includes(campo)
   if (checar('regiaoId') && !form.regiaoId) erros.regiaoId = 'Escolha a região.'
-  if (checar('logradouro') && form.logradouro.trim().length < 3) erros.logradouro = 'Informe a rua, praça ou um ponto de referência.'
+  if (checar('logradouro')) {
+    if (form.logradouro.trim().length < 3) erros.logradouro = 'Informe a rua, praça ou um ponto de referência.'
+    else if (form.logradouro.trim().length > LIMITE.logradouro) erros.logradouro = `Use no máximo ${LIMITE.logradouro} caracteres.`
+  }
   if (checar('categoriaId') && !form.categoriaId) erros.categoriaId = 'Escolha o tipo de relato.'
   if (checar('titulo')) {
     if (form.titulo.trim().length < 5) erros.titulo = 'Resuma em pelo menos 5 letras.'
-    else if (form.titulo.length > 100) erros.titulo = 'Use no máximo 100 caracteres.'
+    else if (form.titulo.trim().length > LIMITE.titulo) erros.titulo = `Use no máximo ${LIMITE.titulo} caracteres.`
   }
-  if (checar('descricao') && form.descricao.trim().length < 20) erros.descricao = 'Descreva o que aconteceu em pelo menos 20 letras.'
+  if (checar('descricao')) {
+    if (form.descricao.trim().length < 20) erros.descricao = 'Descreva o que aconteceu em pelo menos 20 letras.'
+    else if (form.descricao.trim().length > LIMITE.descricao) erros.descricao = `Use no máximo ${LIMITE.descricao} caracteres.`
+  }
   if (checar('dataOcorrencia')) {
     if (!form.dataOcorrencia) erros.dataOcorrencia = 'Informe quando aconteceu.'
-    else if (new Date(form.dataOcorrencia) > new Date()) erros.dataOcorrencia = 'A data não pode estar no futuro.'
+    else if (form.dataOcorrencia > hoje()) erros.dataOcorrencia = 'A data não pode estar no futuro.'
   }
   return erros
 }
@@ -68,7 +82,6 @@ const ID_CAMPO: Record<CampoForm, string> = {
   titulo: 'titulo',
   descricao: 'descricao',
   dataOcorrencia: 'data',
-  tags: 'tags',
 }
 
 /** Foca o primeiro campo com erro (depois do React desenhar a etapa certa). */
@@ -140,10 +153,7 @@ export default function EnviarRelato() {
         titulo: form.titulo.trim(),
         descricao: form.descricao.trim(),
         logradouro: form.logradouro.trim(),
-        latitude: null,
-        longitude: null,
         dataOcorrencia: form.dataOcorrencia,
-        tags: form.tags.split(',').map((t) => t.trim().toLowerCase()).filter(Boolean),
       })
       setEnviado(criado)
       setForm(vazio)
@@ -245,7 +255,7 @@ export default function EnviarRelato() {
                       </Selecao>
                     </Campo>
                     <Campo id="logradouro" rotulo="Local" erro={erros.logradouro} dica="Rua e número aproximado, ou um ponto de referência">
-                      <Entrada id="logradouro" autoComplete="off" value={form.logradouro} erro={!!erros.logradouro} onChange={(e) => atualizar('logradouro', e.target.value)} />
+                      <Entrada id="logradouro" autoComplete="off" maxLength={LIMITE.logradouro} value={form.logradouro} erro={!!erros.logradouro} onChange={(e) => atualizar('logradouro', e.target.value)} />
                     </Campo>
                   </>
                 )}
@@ -263,11 +273,11 @@ export default function EnviarRelato() {
                       </Selecao>
                     </Campo>
                     <Campo id="titulo" rotulo="Título" erro={erros.titulo} dica="Ex.: Trecho escuro perto da escadaria">
-                      <Entrada id="titulo" autoComplete="off" maxLength={100} value={form.titulo} erro={!!erros.titulo} onChange={(e) => atualizar('titulo', e.target.value)} />
+                      <Entrada id="titulo" autoComplete="off" maxLength={LIMITE.titulo} value={form.titulo} erro={!!erros.titulo} onChange={(e) => atualizar('titulo', e.target.value)} />
                     </Campo>
                     <div className="md:col-span-2">
-                      <Campo id="descricao" rotulo="Descrição" erro={erros.descricao} dica="Descreva o local e a situação. Não inclua nomes nem dados pessoais.">
-                        <AreaTexto id="descricao" rows={7} value={form.descricao} erro={!!erros.descricao} onChange={(e) => atualizar('descricao', e.target.value)} />
+                      <Campo id="descricao" rotulo="Descrição" erro={erros.descricao} dica={`Até ${LIMITE.descricao} caracteres. Não inclua nomes nem dados pessoais.`}>
+                        <AreaTexto id="descricao" rows={4} maxLength={LIMITE.descricao} value={form.descricao} erro={!!erros.descricao} onChange={(e) => atualizar('descricao', e.target.value)} />
                       </Campo>
                     </div>
                   </>
@@ -275,11 +285,8 @@ export default function EnviarRelato() {
 
                 {etapa === 'quando' && (
                   <>
-                    <Campo id="data" rotulo="Data e hora" erro={erros.dataOcorrencia}>
-                      <Entrada id="data" type="datetime-local" value={form.dataOcorrencia} erro={!!erros.dataOcorrencia} onChange={(e) => atualizar('dataOcorrencia', e.target.value)} />
-                    </Campo>
-                    <Campo id="tags" rotulo="Tags (opcional)" dica="Separe por vírgula. Ex.: noite, ônibus">
-                      <Entrada id="tags" autoComplete="off" value={form.tags} onChange={(e) => atualizar('tags', e.target.value)} />
+                    <Campo id="data" rotulo="Data" erro={erros.dataOcorrencia}>
+                      <Entrada id="data" type="date" max={hoje()} value={form.dataOcorrencia} erro={!!erros.dataOcorrencia} onChange={(e) => atualizar('dataOcorrencia', e.target.value)} />
                     </Campo>
                   </>
                 )}

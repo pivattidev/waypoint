@@ -21,16 +21,13 @@ export interface Relato {
   tags: string[]
 }
 
-/** Corpo do POST /regioes/{id}/relatos. Não leva nada de quem enviou: o relato é anônimo. */
+/** Dados do formulário de envio. Não leva nada de quem enviou: o relato é anônimo. */
 export interface NovoRelato {
   categoriaId: number
   titulo: string
   descricao: string
   logradouro: string
-  latitude: number | null
-  longitude: number | null
-  dataOcorrencia: string
-  tags: string[]
+  dataOcorrencia: string // aaaa-mm-dd (o Java guarda só a data)
 }
 
 /** Corpo do PATCH /relatos/{id}/moderacao. */

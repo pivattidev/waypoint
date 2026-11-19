@@ -1,8 +1,7 @@
-import type { CategoriaJava, RelatoJava, TrechoJava } from '../types/java'
+import type { CategoriaJava, NovoTrechoJava, RelatoJava, RelatoJavaEntrada, TrechoJava } from '../types/java'
 import type { ModeracaoRelato, NovoRelato, Relato, StatusRelato } from '../types/relato'
-import { relatoDoJava } from '../utils/conversaoJava'
-import { requisicao } from './api'
-import { categoriasMock, regioesMock } from './mock/dados'
+import { STATUS_PARA_JAVA, dataParaJava, juntarTexto, relatoDoJava } from '../utils/conversaoJava'
+import { ApiError, requisicao } from './api'
 import { bancoMock, falhar, responder } from './mock/servidor'
 import { REGIOES } from './regioes'
 
@@ -41,24 +40,48 @@ export async function buscarRelato(id: number): Promise<Relato> {
   return relatoDoJava(relato, [trecho], [categoria], REGIOES)
 }
 
-/** POST /regioes/{id}/relatos → 201 */
-export function enviarRelato(regiaoId: number, dados: NovoRelato): Promise<Relato> {
-  const regiao = regioesMock.find((g) => g.id === regiaoId)
-  if (!regiao) return falhar(404, 'Não encontrado', 'Região não encontrada.', `/regioes/${regiaoId}/relatos`)
-  const novo: Relato = {
+/** O Java exige um usuário em todo relato. O site usa sempre o usuário "Anônimo" (id 20 no banco): ninguém é identificado. */
+const USUARIO_ANONIMO_ID = 20
+
+/**
+ * Envio em 2 passos, porque no Java o relato aponta para um trecho que já existe:
+ * POST /trecho → id do trecho · POST /relato com esse id → id do relato (201).
+ */
+export async function enviarRelato(regiaoId: number, dados: NovoRelato): Promise<Relato> {
+  const regiao = REGIOES.find((r) => r.id === regiaoId)
+  if (!regiao) {
+    throw new ApiError({ status: 400, erro: 'Região inválida', mensagem: 'Escolha uma região da lista.', caminho: '/trecho' })
+  }
+
+  // Posição aproximada: um ponto sorteado perto do centro do bairro (não expõe o local exato de quem relata)
+  const latitude = regiao.latitude + (Math.random() - 0.5) * 0.008
+  const longitude = regiao.longitude + (Math.random() - 0.5) * 0.008
+  const trecho: NovoTrechoJava = { logradouro: dados.logradouro, bairro: regiao.nome, latitude, longitude }
+  const idTrecho = await requisicao<number>('/trecho', { method: 'POST', body: JSON.stringify(trecho) })
+
+  const relato: RelatoJavaEntrada = {
+    descricao: juntarTexto(dados.titulo, dados.descricao),
+    dataRelato: dataParaJava(dados.dataOcorrencia),
+    status: STATUS_PARA_JAVA.PENDENTE,
+    usuario: { id: USUARIO_ANONIMO_ID },
+    trecho: { idTrecho },
+    categoria: { idCategoria: dados.categoriaId },
+  }
+  const idRelato = await requisicao<number>('/relato', { method: 'POST', body: JSON.stringify(relato) })
+
+  return {
     ...dados,
-    id: bancoMock.proximoId++,
+    id: idRelato,
     regiaoId,
     regiaoNome: regiao.nome,
-    categoriaNome: categoriasMock.find((c) => c.id === dados.categoriaId)?.nome ?? '',
-    latitude: dados.latitude ?? regiao.latitude,
-    longitude: dados.longitude ?? regiao.longitude,
-    dataEnvio: new Date().toISOString().slice(0, 16),
+    categoriaNome: '',
+    latitude,
+    longitude,
+    dataEnvio: dados.dataOcorrencia,
     status: 'PENDENTE',
     motivoRejeicao: null,
+    tags: [],
   }
-  bancoMock.relatos.push(novo)
-  return responder(novo)
 }
 
 /** PATCH /relatos/{id}/moderacao → 200 · 409 se já moderado */
