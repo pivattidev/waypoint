@@ -5,6 +5,8 @@ import Header from './Header'
 
 export default function Layout() {
   const { pathname } = useLocation()
+  // O Mapa controla a própria largura (mapa até a borda) e o espaço do header fixo
+  const larguraTotal = pathname === '/mapa'
 
   // Chaves no corpo: scrollTo devolve uma Promise em navegadores novos,
   // e o React trataria o retorno como função de limpeza.
@@ -22,7 +24,14 @@ export default function Layout() {
       </a>
       {/* Header fixo e translúcido: o conteúdo passa por baixo dele */}
       <Header />
-      <main id="conteudo" className="mx-auto w-full max-w-[1760px] flex-1 px-4 pb-24 pt-[calc(76px+3rem)] sm:px-6 sm:pt-[calc(76px+4rem)] lg:px-12">
+      <main
+        id="conteudo"
+        className={
+          larguraTotal
+            ? 'w-full flex-1'
+            : 'mx-auto w-full max-w-[1760px] flex-1 px-4 pb-24 pt-[calc(76px+3rem)] sm:px-6 sm:pt-[calc(76px+4rem)] lg:px-12'
+        }
+      >
         <Outlet />
       </main>
       <Footer />
