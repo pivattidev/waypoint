@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useState, type CSSProperties, type FormEvent } from 'react'
 import { Link } from 'react-router-dom' 
 import Button from '../components/Button'
 import Campo, { AreaTexto, Entrada } from '../components/Campo'
@@ -24,6 +24,11 @@ function validar(form: FormContato): ErrosContato {
   if (form.mensagem.trim().length < 10) erros.mensagem = 'Escreva a mensagem com pelo menos 10 letras.'
   return erros
 }
+
+/**
+ * Contato com validação. Como não existe endpoint na API, o envio monta um e-mail pronto (mailto:)
+ * em vez de fingir que a mensagem foi enviada.
+ */
 
 export default function Contato() {
   const [form, setForm] = useState<FormContato>(vazio)
@@ -68,37 +73,33 @@ export default function Contato() {
 
       {/* Proporção 2/3 + 1/3: o formulário ocupa a maior parte da tela, os canais ficam na lateral */}
       <div className="grid gap-14 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] xl:gap-20">
-      <form noValidate onSubmit={enviar} className="flex flex-col gap-6">
-        {pronto && (
-          <p role="status" className="entrar border-l-2 border-teal pl-4 text-ink">
-            <strong className="block">Mensagem pronta no seu app de e-mail.</strong>
-            <span className="text-muted">Confira e envie por lá. Se nada abriu, escreva para {EMAIL_CONTATO}.</span>
-          </p>
-        )}
-        <Campo id="nome" rotulo="Nome" erro={erros.nome}>
-          <Entrada id="nome" name="nome" autoComplete="name" value={form.nome} erro={!!erros.nome} onChange={(e) => atualizar('nome', e.target.value)} />
-        </Campo>
-        <Campo id="email" rotulo="E-mail" erro={erros.email} dica="Só para responder você. Não vai para nenhum relato.">
-          <Entrada id="email" name="email" type="email" autoComplete="email" spellCheck={false} value={form.email} erro={!!erros.email} onChange={(e) => atualizar('email', e.target.value)} />
-        </Campo>
-        <Campo id="mensagem" rotulo="Mensagem" erro={erros.mensagem}>
-          <AreaTexto id="mensagem" name="mensagem" rows={9} value={form.mensagem} erro={!!erros.mensagem} onChange={(e) => atualizar('mensagem', e.target.value)} />
-        </Campo>
-        <Button type="submit" className="mt-2 self-start">
-          Escrever e-mail
-        </Button>
-
-        {linkGmail && (
-          <p className="text-sm">
-            O e-mail não abriu?{' '}
-            <a href={linkGmail} target="_blank" rel="noreferrer" className="underline">
-              Abrir no Gmail
-            </a>
-          </p>
-        )}
-      </form>
+      <form noValidate onSubmit={enviar} className="entrar flex flex-col gap-6" style={{ '--i': 3 } as CSSProperties}>
+          {pronto && (
+            <p role="status" className="entrar border-l-2 border-teal pl-4 text-ink">
+              <strong className="block">Mensagem pronta no seu app de e-mail.</strong>
+              <span className="text-muted">Confira e envie por lá. Se nada abriu, escreva para {EMAIL_CONTATO}.</span>
+            </p>
+          )}
+          {/* Nome e e-mail lado a lado: campos curtos não precisam da largura toda */}
+          <div className="grid gap-6 md:grid-cols-2">
+            <Campo id="nome" rotulo="Nome" erro={erros.nome}>
+              <Entrada id="nome" name="nome" autoComplete="name" value={form.nome} erro={!!erros.nome} onChange={(e) => atualizar('nome', e.target.value)} />
+            </Campo>
+            <Campo id="email" rotulo="E-mail" erro={erros.email} dica="Só para responder você. Não vai para nenhum relato.">
+              <Entrada id="email" name="email" type="email" autoComplete="email" spellCheck={false} value={form.email} erro={!!erros.email} onChange={(e) => atualizar('email', e.target.value)} />
+            </Campo>
+          </div>
+          <Campo id="mensagem" rotulo="Mensagem" erro={erros.mensagem}>
+            <AreaTexto id="mensagem" name="mensagem" rows={9} value={form.mensagem} erro={!!erros.mensagem} onChange={(e) => atualizar('mensagem', e.target.value)} />
+          </Campo>
+          <Button type="submit" className="mt-2 self-start max-sm:self-stretch">
+            Escrever e-mail
+          </Button>
+        </form>
       {/* Outros canais: na lateral, separados só por uma linha */}
-        <aside className="border-t border-line pt-8 xl:sticky xl:top-28 xl:self-start xl:border-l xl:border-t-0 xl:pl-12 xl:pt-0">
+        <aside
+          className="entrar border-t border-line pt-8 xl:sticky xl:top-28 xl:self-start xl:border-l xl:border-t-0 xl:pl-12 xl:pt-0"
+          style={{ '--i': 4 } as CSSProperties}        >
           <h2 className="text-xl">Outros canais</h2>
           <dl className="mt-6 space-y-6 text-[15px]">
             <div>
