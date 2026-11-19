@@ -48,6 +48,9 @@ function MaisDaRegiao({ relato }: { relato: Relato }) {
         <h2 id="mais-regiao" className="text-[clamp(1.5rem,2.5vw,2rem)]">
           Também em {relato.regiaoNome}
         </h2>
+        <Link to={`/mapa?regiao=${relato.regiaoId}`} className="inline-flex min-h-11 items-center font-bold text-link underline-offset-4 hover:underline">
+          Ver no mapa
+        </Link>
       </div>
       <ul className="mt-4 border-t border-line">
         {outros.map((r, i) => (

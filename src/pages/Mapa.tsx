@@ -1,4 +1,5 @@
 import { useState, type CSSProperties } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { LinkBotao } from '../components/Button'
 import CategoriaIcone from '../components/CategoriaIcone'
 import { Carregando, ListaVazia, MensagemErro } from '../components/EstadoTela'
@@ -18,9 +19,10 @@ const abaRegiao = (ativa: boolean) =>
 
 export default function Mapa() {
   const regioes = useRequisicao(listarRegioes, [])
-  // Sem região escolhida, mostra a primeira da lista
-  const [escolhida, setEscolhida] = useState<number | null>(null)
-  const regiaoId = escolhida ?? regioes.dados?.[0]?.id ?? null
+  // A região escolhida fica na URL (?regiao=2): links de outras páginas abrem o mapa direto nela
+  const [params, setParams] = useSearchParams()
+  const regiaoUrl = Number(params.get('regiao'))
+  const regiaoId = Number.isInteger(regiaoUrl) && regiaoUrl > 0 ? regiaoUrl : (regioes.dados?.[0]?.id ?? null)
   const [selecionadoId, setSelecionadoId] = useState<number | null>(null)
 
   const relatos = useRequisicao(() => (regiaoId === null ? Promise.resolve([]) : listarRelatosDaRegiao(regiaoId)), [regiaoId])
@@ -28,7 +30,7 @@ export default function Mapa() {
 
   // Trocar de região limpa a seleção
   const escolherRegiao = (id: number) => {
-    setEscolhida(id)
+    setParams({ regiao: String(id) }, { replace: true })
     setSelecionadoId(null)
   }
   const lista = relatos.dados ?? []
