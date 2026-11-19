@@ -141,7 +141,7 @@ export default function RelatoDetalhe() {
             {/* Lado: onde fica (mapa) e a nota de anonimato, discreta */}
             <aside className="flex flex-col gap-6 lg:sticky lg:top-28 lg:self-start">
               <div className="entrar" style={ordem(3)}>
-                <MapaPrevia relatos={[relato]} selecionadoId={relato.id} />
+                <MapaPrevia relatos={[relato]} selecionadoId={relato.id} variante="ficha" />
               </div>
               <p className="entrar flex gap-3 text-[15px] text-muted" style={ordem(4)}>
                 {/* Olho riscado: quem enviou não aparece */}

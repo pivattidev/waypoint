@@ -196,6 +196,24 @@
   }
 }
 
+/* Pulso do relato em foco (responde ao usuário: hover/seleção). */
+@keyframes pulso {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+.pulso {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pulso 1.4s ease-out infinite;
+}
+
 /* ---------- Respostas a ações do usuário (curtas) ---------- */
 
 /* Pin pousa na confirmação de envio */
