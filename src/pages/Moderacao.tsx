@@ -9,7 +9,7 @@ import StatusBadge from '../components/StatusBadge'
 import { useMidia } from '../hooks/useMidia'
 import { useRequisicao } from '../hooks/useRequisicao'
 import { mensagemDeErro } from '../services/api'
-import { listarRelatos, moderarRelato } from '../services/relatos'
+import { excluirRelato, listarRelatos, moderarRelato } from '../services/relatos'
 import type { Relato, StatusRelato } from '../types/relato'
 import { formatarDataHora, tempoDecorrido } from '../utils/formatar'
 
@@ -22,7 +22,7 @@ const abas: { status: StatusRelato; rotulo: string }[] = [
   { status: 'REJEITADO', rotulo: 'Rejeitados' },
 ]
 
-type Acao = 'aprovar' | 'rejeitar'
+type Acao = 'aprovar' | 'rejeitar' | 'excluir'
 
 interface FichaProps {
   relato: Relato
@@ -32,7 +32,7 @@ interface FichaProps {
 
 /** Ficha de moderação: lê o relato inteiro e decide. Só PENDENTE pode ser moderado (regra do Java: senão 409). */
 function Ficha({ relato, onConcluir }: FichaProps) {
-  const [modo, setModo] = useState<'ler' | 'rejeitar'>('ler')
+  const [modo, setModo] = useState<'ler' | 'rejeitar' | 'excluir'>('ler')
   const [motivo, setMotivo] = useState('')
   const [acao, setAcao] = useState<Acao | null>(null)
   const [erro, setErro] = useState<string | null>(null)
@@ -45,12 +45,17 @@ function Ficha({ relato, onConcluir }: FichaProps) {
     setAcao(tipo)
     setErro(null)
     try {
-      await moderarRelato(relato.id, {
-        status: tipo === 'aprovar' ? 'APROVADO' : 'REJEITADO',
-        moderadorId: MODERADOR_ID,
-        motivoRejeicao: tipo === 'rejeitar' ? motivo.trim() : undefined,
-      })
-      onConcluir(tipo === 'aprovar' ? 'Relato aprovado e publicado no mapa.' : 'Relato rejeitado. O motivo ficou registrado.')
+      if (tipo === 'excluir') {
+        await excluirRelato(relato.id)
+        onConcluir('Relato excluído.')
+      } else {
+        await moderarRelato(relato.id, {
+          status: tipo === 'aprovar' ? 'APROVADO' : 'REJEITADO',
+          moderadorId: MODERADOR_ID,
+          motivoRejeicao: tipo === 'rejeitar' ? motivo.trim() : undefined,
+        })
+        onConcluir(tipo === 'aprovar' ? 'Relato aprovado e publicado no mapa.' : 'Relato rejeitado. O motivo ficou registrado.')
+      }
     } catch (e) {
       // 409 "Este relato já foi moderado." e outros erros chegam com a mensagem do Java
       setErro(mensagemDeErro(e))
@@ -106,14 +111,27 @@ function Ficha({ relato, onConcluir }: FichaProps) {
         </div>
       )}
 
+      {modo === 'excluir' && (
+        <p role="alert" className="entrar mt-6 border-l-2 border-alert pl-4 font-bold text-alert-text">
+          Excluir de vez? Não dá para desfazer.
+        </p>
+      )}
+
       <div className="mt-8 flex flex-wrap gap-2">
-        {modo === 'ler' && relato.status === 'PENDENTE' && (
+        {modo === 'ler' && (
           <>
-            <Button onClick={() => executar('aprovar')} carregando={acao === 'aprovar'} disabled={acao !== null}>
-              Aprovar
-            </Button>
-            <Button variante="neutro" onClick={() => setModo('rejeitar')} disabled={acao !== null}>
-              Rejeitar
+            {relato.status === 'PENDENTE' && (
+              <>
+                <Button onClick={() => executar('aprovar')} carregando={acao === 'aprovar'} disabled={acao !== null}>
+                  Aprovar
+                </Button>
+                <Button variante="neutro" onClick={() => setModo('rejeitar')} disabled={acao !== null}>
+                  Rejeitar
+                </Button>
+              </>
+            )}
+            <Button variante="fantasma" className="ml-auto" onClick={() => setModo('excluir')} disabled={acao !== null}>
+              Excluir
             </Button>
           </>
         )}
@@ -121,6 +139,16 @@ function Ficha({ relato, onConcluir }: FichaProps) {
           <>
             <Button variante="perigo" onClick={() => executar('rejeitar')} carregando={acao === 'rejeitar'}>
               Confirmar rejeição
+            </Button>
+            <Button variante="neutro" onClick={() => setModo('ler')} disabled={acao !== null}>
+              Cancelar
+            </Button>
+          </>
+        )}
+        {modo === 'excluir' && (
+          <>
+            <Button variante="perigo" onClick={() => executar('excluir')} carregando={acao === 'excluir'}>
+              Excluir de vez
             </Button>
             <Button variante="neutro" onClick={() => setModo('ler')} disabled={acao !== null}>
               Cancelar
