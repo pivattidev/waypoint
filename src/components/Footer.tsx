@@ -3,7 +3,7 @@ import { MarcaWaypoint } from './Logo'
 import Pin from './Pin'
 
 const colunas = [
-  { titulo: 'Solução', links: [['/relatos', 'Relatos']] },
+  { titulo: 'Solução', links: [['/mapa', 'Mapa'], ['/relatos', 'Relatos']] },
   { titulo: 'Projeto', links: [['/sobre', 'Sobre'], ['/integrantes', 'Integrantes'], ['/faq', 'FAQ'], ['/contato', 'Contato']] },
 ]
 
