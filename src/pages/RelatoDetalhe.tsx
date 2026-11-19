@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { LinkBotao } from '../components/Button'
 import CategoriaIcone from '../components/CategoriaIcone'
 import { Carregando, ListaVazia, MensagemErro } from '../components/EstadoTela'
+import MapaPrevia from '../components/MapaPrevia'
 import StatusBadge from '../components/StatusBadge'
 import { useRequisicao } from '../hooks/useRequisicao'
 import { buscarRelato } from '../services/relatos'
@@ -110,6 +111,25 @@ export default function RelatoDetalhe() {
                 </div>
               )}
             </div>
+
+            {/* Lado: onde fica (mapa) e a nota de anonimato, discreta */}
+            <aside className="flex flex-col gap-6 lg:sticky lg:top-28 lg:self-start">
+              <div className="entrar" style={ordem(3)}>
+                <MapaPrevia relatos={[relato]} selecionadoId={relato.id} />
+              </div>
+              <p className="entrar flex gap-3 text-[15px] text-muted" style={ordem(4)}>
+                {/* Olho riscado: quem enviou não aparece */}
+                <svg viewBox="0 0 24 24" className="mt-0.5 size-5 shrink-0 text-link" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <path d="M3 3l18 18" />
+                  <path d="M10.6 5.1A10.5 10.5 0 0 1 12 5c5.5 0 9 5.5 9 7a12 12 0 0 1-2.6 3.4M6.2 6.2C4 7.6 3 10.5 3 12c0 1.5 3.5 7 9 7a9.6 9.6 0 0 0 4.6-1.2" />
+                  <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2" />
+                </svg>
+                <span>
+                  <strong className="block text-ink">Quem enviou não aparece em lugar nenhum.</strong>
+                  O relato não guarda nome, e-mail nem IP. Nem a moderação sabe quem foi.
+                </span>
+              </p>
+            </aside>
           </div>
         </>
       )}

@@ -198,6 +198,21 @@
 
 /* ---------- Respostas a ações do usuário (curtas) ---------- */
 
+/* Pin pousa na confirmação de envio */
+@keyframes pousar {
+  from {
+    transform: translateY(-14px) scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+.pousar {
+  animation: pousar 250ms var(--ease-saida) both;
+}
+
 /* Entrada de painel que surge de um gatilho (menu, gaveta, ficha) */
 @keyframes surgir {
   from {
