@@ -5,6 +5,7 @@ import Faq from './pages/Faq'
 import Home from './pages/Home'
 import Integrantes from './pages/Integrantes'
 import NaoEncontrada from './pages/NaoEncontrada'
+import RelatoDetalhe from './pages/RelatoDetalhe'
 import Relatos from './pages/Relatos'
 import Sobre from './pages/Sobre'
 
@@ -21,6 +22,7 @@ export default function App() {
 
         {/* Solução */}
         <Route path="relatos" element={<Relatos />} />
+        <Route path="relatos/:id" element={<RelatoDetalhe />} />
 
         <Route path="*" element={<NaoEncontrada />} />
       </Route>
