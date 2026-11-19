@@ -2,6 +2,7 @@ import { useState, type CSSProperties } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import Button from '../components/Button'
 import { AreaTexto } from '../components/Campo'
+import Carimbo from '../components/Carimbo'
 import CategoriaIcone from '../components/CategoriaIcone'
 import { Carregando, ListaVazia, MensagemErro } from '../components/EstadoTela'
 import PageHeader from '../components/PageHeader'
@@ -36,6 +37,7 @@ function Ficha({ relato, onConcluir }: FichaProps) {
   const [motivo, setMotivo] = useState('')
   const [acao, setAcao] = useState<Acao | null>(null)
   const [erro, setErro] = useState<string | null>(null)
+  const [carimbado, setCarimbado] = useState(false)
 
   const executar = async (tipo: Acao) => {
     if (tipo === 'rejeitar' && motivo.trim().length < 10) {
@@ -54,7 +56,13 @@ function Ficha({ relato, onConcluir }: FichaProps) {
           moderadorId: MODERADOR_ID,
           motivoRejeicao: tipo === 'rejeitar' ? motivo.trim() : undefined,
         })
-        onConcluir(tipo === 'aprovar' ? 'Relato aprovado e publicado no mapa.' : 'Relato rejeitado. O motivo ficou registrado.')
+        if (tipo === 'aprovar') {
+          // O carimbo "cai" na ficha e só depois a fila anda: a pessoa vê o que mudou
+          setCarimbado(true)
+          window.setTimeout(() => onConcluir('Relato aprovado e publicado no mapa.'), 900)
+        } else {
+          onConcluir('Relato rejeitado. O motivo ficou registrado.')
+        }
       }
     } catch (e) {
       // 409 "Este relato já foi moderado." e outros erros chegam com a mensagem do Java
@@ -65,6 +73,11 @@ function Ficha({ relato, onConcluir }: FichaProps) {
 
   return (
     <article className="entrar relative" aria-labelledby={`ficha-${relato.id}`}>
+      {carimbado && (
+        <div className="pointer-events-none absolute right-0 top-0">
+          <Carimbo tamanho="g" recemCarimbado />
+        </div>
+      )}
       <p className="flex flex-wrap items-center gap-x-4 gap-y-2">
         <span className="inline-flex items-center gap-2 text-[15px] font-bold text-alert-text">
           <CategoriaIcone nome={relato.categoriaNome} className="size-4" />
@@ -118,7 +131,7 @@ function Ficha({ relato, onConcluir }: FichaProps) {
       )}
 
       <div className="mt-8 flex flex-wrap gap-2">
-        {modo === 'ler' && (
+        {modo === 'ler' && !carimbado && (
           <>
             {relato.status === 'PENDENTE' && (
               <>

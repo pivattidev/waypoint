@@ -1,12 +1,28 @@
 interface CarimboProps {
+  /** true quando acabou de ser aprovado: o carimbo "cai" sobre a ficha (resposta à ação). */
+  recemCarimbado?: boolean
+  tamanho?: 'p' | 'g'
   className?: string
 }
 
 /**
- * Carimbo "Verificado pela moderação".
+ * Carimbo "Verificado pela moderação" (modo Anonimato e Moderação).
  * Forma própria (escudo + check + texto) para não depender só da cor.
  */
-export default function Carimbo({ className = '' }: CarimboProps) {
+export default function Carimbo({ recemCarimbado = false, tamanho = 'p', className = '' }: CarimboProps) {
+  if (tamanho === 'g') {
+    return (
+      <span
+        className={`inline-flex -rotate-[4deg] items-center gap-2.5 rounded-ctl border-[3px] border-double border-link px-4 py-2 font-display text-lg font-black tracking-[-0.01em] text-link ${
+          recemCarimbado ? 'carimbar' : ''
+        } ${className}`}
+      >
+        <Escudo className="size-6" />
+        Verificado pela moderação
+      </span>
+    )
+  }
+
   return (
     <span className={`inline-flex items-center gap-1.5 rounded-full bg-tealbg px-3 py-1 text-[13px] font-bold leading-none text-link ${className}`}>
       <Escudo className="size-3.5" />

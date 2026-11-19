@@ -293,6 +293,21 @@
 
 /* ---------- Respostas a ações do usuário (curtas) ---------- */
 
+/* Carimbo da moderação "cai" sobre a ficha ao aprovar */
+@keyframes carimbar {
+  from {
+    transform: scale(1.35) rotate(-10deg);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) rotate(-4deg);
+    opacity: 1;
+  }
+}
+.carimbar {
+  animation: carimbar 200ms var(--ease-saida) both;
+}
+
 /* Pin pousa na confirmação de envio */
 @keyframes pousar {
   from {
