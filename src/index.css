@@ -213,6 +213,17 @@
   animation: surgir 180ms var(--ease-saida) both;
 }
 
+/* Rota que se traça em loop no "servidor acordando" (espera longa) */
+@keyframes andar {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+.rota-andando {
+  stroke-dasharray: 2 6;
+  animation: andar 0.9s linear infinite;
+}
+
 /* ---------- Entrada da página: os blocos surgem em sequência, subindo um pouco ----------
    Uso: className="entrar" e style={{ '--i': n }} para escalonar (n * 60ms).
    Só opacidade e transform (não força layout). Desligado com prefers-reduced-motion (regra da base). */
