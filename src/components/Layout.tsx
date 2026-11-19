@@ -5,8 +5,8 @@ import Header from './Header'
 
 export default function Layout() {
   const { pathname } = useLocation()
-  // O Mapa controla a própria largura (mapa até a borda) e o espaço do header fixo
-  const larguraTotal = pathname === '/mapa'
+  // Home e Mapa controlam a própria largura (mapa até a borda) e o espaço do header fixo
+  const larguraTotal = pathname === '/' || pathname === '/mapa'
 
   // Chaves no corpo: scrollTo devolve uma Promise em navegadores novos,
   // e o React trataria o retorno como função de limpeza.
