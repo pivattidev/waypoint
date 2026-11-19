@@ -1,14 +1,20 @@
 import { useState, type CSSProperties } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
+import Button from '../components/Button'
+import { AreaTexto } from '../components/Campo'
 import CategoriaIcone from '../components/CategoriaIcone'
 import { Carregando, ListaVazia, MensagemErro } from '../components/EstadoTela'
 import PageHeader from '../components/PageHeader'
 import StatusBadge from '../components/StatusBadge'
 import { useMidia } from '../hooks/useMidia'
 import { useRequisicao } from '../hooks/useRequisicao'
-import { listarRelatos } from '../services/relatos'
+import { mensagemDeErro } from '../services/api'
+import { listarRelatos, moderarRelato } from '../services/relatos'
 import type { Relato, StatusRelato } from '../types/relato'
 import { formatarDataHora, tempoDecorrido } from '../utils/formatar'
+
+// TODO: sem login por enquanto. O moderador fixo é o cd_moderador 1 do script SQL.
+const MODERADOR_ID = 1
 
 const abas: { status: StatusRelato; rotulo: string }[] = [
   { status: 'PENDENTE', rotulo: 'Pendentes' },
@@ -16,8 +22,42 @@ const abas: { status: StatusRelato; rotulo: string }[] = [
   { status: 'REJEITADO', rotulo: 'Rejeitados' },
 ]
 
-/** Ficha de moderação: lê o relato inteiro antes de decidir. */
-function Ficha({ relato }: { relato: Relato }) {
+type Acao = 'aprovar' | 'rejeitar'
+
+interface FichaProps {
+  relato: Relato
+  /** Mensagem de sucesso + se o relato saiu da fila atual. */
+  onConcluir: (mensagem: string) => void
+}
+
+/** Ficha de moderação: lê o relato inteiro e decide. Só PENDENTE pode ser moderado (regra do Java: senão 409). */
+function Ficha({ relato, onConcluir }: FichaProps) {
+  const [modo, setModo] = useState<'ler' | 'rejeitar'>('ler')
+  const [motivo, setMotivo] = useState('')
+  const [acao, setAcao] = useState<Acao | null>(null)
+  const [erro, setErro] = useState<string | null>(null)
+
+  const executar = async (tipo: Acao) => {
+    if (tipo === 'rejeitar' && motivo.trim().length < 10) {
+      setErro('Explique o motivo em pelo menos 10 letras. Ele fica registrado no relato.')
+      return
+    }
+    setAcao(tipo)
+    setErro(null)
+    try {
+      await moderarRelato(relato.id, {
+        status: tipo === 'aprovar' ? 'APROVADO' : 'REJEITADO',
+        moderadorId: MODERADOR_ID,
+        motivoRejeicao: tipo === 'rejeitar' ? motivo.trim() : undefined,
+      })
+      onConcluir(tipo === 'aprovar' ? 'Relato aprovado e publicado no mapa.' : 'Relato rejeitado. O motivo ficou registrado.')
+    } catch (e) {
+      // 409 "Este relato já foi moderado." e outros erros chegam com a mensagem do Java
+      setErro(mensagemDeErro(e))
+      setAcao(null)
+    }
+  }
+
   return (
     <article className="entrar relative" aria-labelledby={`ficha-${relato.id}`}>
       <p className="flex flex-wrap items-center gap-x-4 gap-y-2">
@@ -50,6 +90,44 @@ function Ficha({ relato }: { relato: Relato }) {
           <strong className="text-alert-text">Motivo da rejeição:</strong> {relato.motivoRejeicao}
         </p>
       )}
+
+      {erro && (
+        <p role="alert" className="mt-6 border-l-2 border-alert pl-4 font-bold text-alert-text">
+          {erro}
+        </p>
+      )}
+
+      {modo === 'rejeitar' && (
+        <div className="entrar mt-6">
+          <label htmlFor={`motivo-${relato.id}`} className="mb-1.5 block text-[15px] font-bold">
+            Motivo da rejeição (obrigatório)
+          </label>
+          <AreaTexto id={`motivo-${relato.id}`} value={motivo} onChange={(e) => setMotivo(e.target.value)} />
+        </div>
+      )}
+
+      <div className="mt-8 flex flex-wrap gap-2">
+        {modo === 'ler' && relato.status === 'PENDENTE' && (
+          <>
+            <Button onClick={() => executar('aprovar')} carregando={acao === 'aprovar'} disabled={acao !== null}>
+              Aprovar
+            </Button>
+            <Button variante="neutro" onClick={() => setModo('rejeitar')} disabled={acao !== null}>
+              Rejeitar
+            </Button>
+          </>
+        )}
+        {modo === 'rejeitar' && (
+          <>
+            <Button variante="perigo" onClick={() => executar('rejeitar')} carregando={acao === 'rejeitar'}>
+              Confirmar rejeição
+            </Button>
+            <Button variante="neutro" onClick={() => setModo('ler')} disabled={acao !== null}>
+              Cancelar
+            </Button>
+          </>
+        )}
+      </div>
     </article>
   )
 }
@@ -59,6 +137,7 @@ export default function Moderacao() {
   const [params, setParams] = useSearchParams()
   const status: StatusRelato = abas.find((a) => a.status === params.get('status'))?.status ?? 'PENDENTE'
   const setStatus = (s: StatusRelato) => setParams(s === 'PENDENTE' ? {} : { status: s }, { replace: true })
+  const [aviso, setAviso] = useState<string | null>(null)
   const [selecionadoId, setSelecionadoId] = useState<number | null>(null)
   const desktop = useMidia('(min-width: 1024px)')
   // Busca todos uma vez (GET /relatos) para mostrar a contagem de cada aba
@@ -68,6 +147,12 @@ export default function Moderacao() {
   const contagem = (s: StatusRelato) => (dados ?? []).filter((r) => r.status === s).length
   // No desktop sempre há uma ficha aberta: a escolhida ou, se nenhuma, a primeira da fila (a mais antiga)
   const selecionado = fila.find((r) => r.id === selecionadoId) ?? (desktop ? (fila[0] ?? null) : null)
+
+  const concluir = (mensagem: string) => {
+    setAviso(mensagem)
+    setSelecionadoId(null)
+    recarregar()
+  }
 
   const itemFila = (r: Relato) => {
     const ativo = r.id === selecionado?.id
@@ -123,6 +208,7 @@ export default function Moderacao() {
                 onClick={() => {
                   setStatus(aba.status)
                   setSelecionadoId(null)
+                  setAviso(null)
                 }}
                 className={`-mb-px flex min-h-12 items-center gap-2 border-b-2 px-1 text-[15px] font-bold transition-colors ${
                   ativa ? 'border-teal text-ink' : 'border-transparent text-muted hover:text-ink'
@@ -135,6 +221,12 @@ export default function Moderacao() {
           })}
         </div>
       </div>
+
+      {aviso && (
+        <p role="status" className="entrar mb-8 max-w-3xl border-l-2 border-teal pl-4 font-bold">
+          {aviso}
+        </p>
+      )}
 
       {carregando && <Carregando texto="Buscando relatos" />}
       {erro && <MensagemErro titulo="Não foi possível carregar a fila" mensagem={erro.message} onTentarNovamente={recarregar} />}
@@ -155,7 +247,7 @@ export default function Moderacao() {
                   {/* Celular e tablet: a ficha abre logo abaixo do item (acordeão) */}
                   {!desktop && r.id === selecionado?.id && (
                     <div className="border-b border-l-2 border-b-line border-l-teal py-6 pl-4">
-                      <Ficha key={r.id} relato={r} />
+                      <Ficha key={r.id} relato={r} onConcluir={concluir} />
                     </div>
                   )}
                 </li>
@@ -164,7 +256,7 @@ export default function Moderacao() {
           </section>
           {desktop && selecionado && (
             <div className="sticky top-28 min-h-[50vh] border-l border-line pl-12">
-              <Ficha key={selecionado.id} relato={selecionado} />
+              <Ficha key={selecionado.id} relato={selecionado} onConcluir={concluir} />
             </div>
           )}
         </div>
