@@ -1,6 +1,19 @@
-import type { CSSProperties } from 'react'
+import { useState, type CSSProperties } from 'react'
 import { useMidia } from '../hooks/useMidia'
+import { PONTOS_RELATO, POSTES, type IdRota } from '../utils/rotasExemplo'
 import MapaNoturno from './MapaNoturno'
+import SeletorRota, { type OpcaoRota } from './SeletorRota'
+
+/**
+ * As duas rotas do EXEMPLO ilustrado (o cálculo real vem do GET /rotas da API, fase 2).
+ * Mesmos números do conceito: "18 min, 3 relatos" x "22 min, 0 relatos".
+ */
+const OPCOES: OpcaoRota[] = [
+  { id: 'direta', minutos: 18, via: 'Pela R. Augusta', relatos: PONTOS_RELATO.length },
+  { id: 'iluminada', minutos: 22, via: 'Pela Av. da Consolação', relatos: 0 },
+]
+
+const acesos = POSTES.iluminada.filter((p) => p.aceso).length
 
 /**
  * Recorte justo em volta das duas rotas (com as etiquetas).
@@ -9,11 +22,33 @@ import MapaNoturno from './MapaNoturno'
  */
 const RECORTE_ROTAS = '660 30 840 760'
 
+/** Resumo da rota escolhida: uma frase e um apoio. */
+function Resumo({ rota }: { rota: IdRota }) {
+  return (
+    <div aria-live="polite">
+      {rota === 'iluminada' ? (
+        <>
+          <p className="font-bold text-nite-ink">{acesos} postes acesos, nenhum relato no caminho</p>
+          <p className="mt-1 text-[15px] text-nite-muted">Quatro minutos a mais, com luz do começo ao fim.</p>
+        </>
+      ) : (
+        <>
+          <p className="font-bold text-nite-alert-text">{PONTOS_RELATO.length} relatos no trecho escuro</p>
+          <p className="mt-1 text-[15px] text-nite-muted">Mais curta, mas passa por postes apagados.</p>
+        </>
+      )}
+    </div>
+  )
+}
+
 export default function HeroRota() {
   // Monta só UMA versão do mapa (desktop ou celular): o SVG é a parte mais pesada da página
   const desktop = useMidia('(min-width: 1280px)')
   // Celular: recorte que preenche o cartão. Tablet: recorte inteiro ("meet"), para as rotas não serem cortadas
   const celular = !useMidia('(min-width: 640px)')
+  const [rota, setRota] = useState<IdRota>('iluminada')
+
+  const notaExemplo = <p className="text-[13px] text-nite-muted">Exemplo ilustrado. O cálculo de rota chega com a API.</p>
 
   return (
     <section aria-labelledby="titulo-hero" className="relative isolate overflow-hidden bg-nite-bg pb-32 text-nite-ink">
@@ -22,7 +57,7 @@ export default function HeroRota() {
         <div className="entrar absolute inset-y-0 left-[max(616px,calc(50%-264px))] right-0 -z-10 [contain:strict]" style={{ '--i': 1 } as CSSProperties} aria-hidden>
           {/* Rotas na parte de cima; o painel fica embaixo, sem cobrir nada */}
           <div className="absolute inset-x-0 bottom-[420px] top-[100px]">
-            <MapaNoturno rotaSelecionada="iluminada" recorte={RECORTE_ROTAS} encaixe="meet" />
+            <MapaNoturno rotaSelecionada={rota} recorte={RECORTE_ROTAS} encaixe="meet" />
           </div>
           {/* A borda esquerda do mapa some no fundo: texto e mapa ficam juntos, sem moldura */}
           <div className="absolute inset-y-0 left-0 w-40 bg-gradient-to-r from-nite-bg to-transparent" />
@@ -44,15 +79,20 @@ export default function HeroRota() {
             Rotas a pé com relatos recentes da comunidade, por região. Sem login e sem dar seu nome.
           </p>
 
-          {/* Celular e tablet: o mapa entra já na primeira tela */}
+          {/* Celular e tablet: o mapa e a escolha de rota entram já na primeira tela */}
           {!desktop && (
             <div className="entrar mt-8" style={{ '--i': 2 } as CSSProperties}>
               <div className="relative aspect-[4/3] overflow-hidden rounded-mapa border border-nite-line sm:aspect-[16/9] sm:p-6">
                 {celular ? (
-                  <MapaNoturno rotaSelecionada="iluminada" recorte="640 40 940 705" />
+                  <MapaNoturno rotaSelecionada={rota} recorte="640 40 940 705" />
                 ) : (
-                  <MapaNoturno rotaSelecionada="iluminada" recorte={RECORTE_ROTAS} encaixe="meet" />
+                  <MapaNoturno rotaSelecionada={rota} recorte={RECORTE_ROTAS} encaixe="meet" />
                 )}
+              </div>
+              <SeletorRota opcoes={OPCOES} valor={rota} onMudar={setRota} className="mt-3" />
+              <div className="mt-4 flex flex-col gap-3 px-1">
+                <Resumo rota={rota} />
+                {notaExemplo}
               </div>
             </div>
           )}
@@ -62,6 +102,19 @@ export default function HeroRota() {
           </blockquote>
         </div>
       </div>
+
+      {/* Desktop: painel de rotas na mesma faixa do mapa, centralizado embaixo das rotas (nunca por cima delas) */}
+      {desktop && (
+        <div className="entrar absolute bottom-32 right-[max(48px,calc(50%-832px))] w-[420px]" style={{ '--i': 3 } as CSSProperties}>
+          <div className="w-full max-w-[420px] rounded-painel border border-nite-line bg-nite-panel p-2 shadow-[0_24px_60px_-24px_rgb(0_0_0/0.55)]">
+            <SeletorRota opcoes={OPCOES} valor={rota} onMudar={setRota} />
+            <div className="flex flex-col gap-3 px-3 pb-2 pt-4">
+              <Resumo rota={rota} />
+              <div className="border-t border-nite-line pt-3">{notaExemplo}</div>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   )
 }
