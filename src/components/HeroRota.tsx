@@ -1,4 +1,5 @@
-import { useState, type CSSProperties } from 'react'
+import { useState, type CSSProperties, type FormEvent } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useMidia } from '../hooks/useMidia'
 import { PONTOS_RELATO, POSTES, type IdRota } from '../utils/rotasExemplo'
 import MapaNoturno from './MapaNoturno'
@@ -22,6 +23,9 @@ const acesos = POSTES.iluminada.filter((p) => p.aceso).length
  */
 const RECORTE_ROTAS = '660 30 840 760'
 
+const campoNoite =
+  'w-full min-h-12 bg-transparent px-0 py-2 text-[17px] text-nite-ink placeholder:text-nite-muted/80 border-0 border-b-2 border-nite-line focus:border-nite-teal transition-colors aria-invalid:border-nite-alert'
+
 /** Resumo da rota escolhida: uma frase e um apoio. */
 function Resumo({ rota }: { rota: IdRota }) {
   return (
@@ -42,11 +46,30 @@ function Resumo({ rota }: { rota: IdRota }) {
 }
 
 export default function HeroRota() {
+  const navigate = useNavigate()
   // Monta só UMA versão do mapa (desktop ou celular): o SVG é a parte mais pesada da página
   const desktop = useMidia('(min-width: 1280px)')
   // Celular: recorte que preenche o cartão. Tablet: recorte inteiro ("meet"), para as rotas não serem cortadas
   const celular = !useMidia('(min-width: 640px)')
   const [rota, setRota] = useState<IdRota>('iluminada')
+  const [origem, setOrigem] = useState('')
+  const [destino, setDestino] = useState('')
+  const [erros, setErros] = useState<{ origem?: string; destino?: string }>({})
+
+  // Valida antes de "buscar". Partida e destino vão por estado de navegação (não ficam na URL nem são salvos).
+  const buscar = (e: FormEvent) => {
+    e.preventDefault()
+    const novos = {
+      origem: origem.trim().length < 3 ? 'Diga de onde você sai: rua, estação ou ponto de referência.' : undefined,
+      destino: destino.trim().length < 3 ? 'Diga para onde você vai.' : undefined,
+    }
+    setErros(novos)
+    if (novos.origem || novos.destino) {
+      document.getElementById(novos.origem ? 'origem' : 'destino')?.focus()
+      return
+    }
+    navigate('/mapa', { state: { origem: origem.trim(), destino: destino.trim() } })
+  }
 
   const notaExemplo = <p className="text-[13px] text-nite-muted">Exemplo ilustrado. O cálculo de rota chega com a API.</p>
 
@@ -96,6 +119,71 @@ export default function HeroRota() {
               </div>
             </div>
           )}
+
+          <form onSubmit={buscar} noValidate className="entrar mt-10 max-w-[28rem]" style={{ '--i': 3 } as CSSProperties} aria-label="Buscar rota a pé">
+            <div className="grid grid-cols-[1.5rem_minmax(0,1fr)] gap-x-4">
+              {/* Trilho do bilhete: origem (bolinha neutra), pontilhado, destino (bolinha vermelha) */}
+              <div className="row-span-2 flex flex-col items-center pb-5 pt-9" aria-hidden>
+                <span className="size-4 rounded-full border-[3px] border-nite-ink" />
+                <span className="my-1.5 w-0 flex-1 border-l-2 border-dotted border-nite-muted/70" />
+                <span className="grid size-[18px] place-items-center rounded-full bg-nite-alert">
+                  <span className="size-2 rounded-full bg-nite-bg" />
+                </span>
+              </div>
+              <div className="pb-4">
+                <label htmlFor="origem" className="text-sm font-bold text-nite-muted">
+                  Onde você está
+                </label>
+                <input
+                  id="origem"
+                  value={origem}
+                  onChange={(e) => {
+                    setOrigem(e.target.value)
+                    setErros((x) => ({ ...x, origem: undefined }))
+                  }}
+                  aria-invalid={!!erros.origem || undefined}
+                  aria-describedby={erros.origem ? 'origem-msg' : undefined}
+                  className={campoNoite}
+                  placeholder="Estação Sé"
+                  autoComplete="off"
+                />
+                {erros.origem && (
+                  <p id="origem-msg" className="mt-1.5 text-sm font-bold text-nite-alert-text">
+                    {erros.origem}
+                  </p>
+                )}
+              </div>
+              <div>
+                <label htmlFor="destino" className="text-sm font-bold text-nite-muted">
+                  Para onde você vai?
+                </label>
+                <input
+                  id="destino"
+                  value={destino}
+                  onChange={(e) => {
+                    setDestino(e.target.value)
+                    setErros((x) => ({ ...x, destino: undefined }))
+                  }}
+                  aria-invalid={!!erros.destino || undefined}
+                  aria-describedby={erros.destino ? 'destino-msg' : undefined}
+                  className={campoNoite}
+                  placeholder="Av. Paulista, 1000"
+                  autoComplete="off"
+                />
+                {erros.destino && (
+                  <p id="destino-msg" className="mt-1.5 text-sm font-bold text-nite-alert-text">
+                    {erros.destino}
+                  </p>
+                )}
+              </div>
+            </div>
+            <button
+              type="submit"
+              className="mt-8 inline-flex min-h-12 w-full items-center justify-center rounded-ctl bg-nite-teal px-6 font-bold text-nite-on-teal transition-[filter,transform] duration-150 hover:brightness-110 active:scale-[0.97] sm:w-auto"
+            >
+              Buscar rota
+            </button>
+          </form>
 
           <blockquote style={{ '--i': 4 } as CSSProperties} className="entrar mt-12 max-w-[28rem] border-l-2 border-nite-teal pl-4 text-[15px] text-nite-muted">
             Todo relato passa por moderação antes de aparecer no mapa, e a identidade de quem enviou fica protegida.
