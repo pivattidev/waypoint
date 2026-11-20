@@ -71,7 +71,7 @@ export default function HeroRota() {
     navigate('/mapa', { state: { origem: origem.trim(), destino: destino.trim() } })
   }
 
-  const notaExemplo = <p className="text-[13px] text-nite-muted">Exemplo ilustrado. O cálculo de rota chega com a API.</p>
+  const notaExemplo = <p className="text-[13px] text-nite-muted">Exemplo ilustrado. O cálculo do caminho fica para uma próxima versão.</p>
 
   return (
     <section aria-labelledby="titulo-hero" className="relative isolate overflow-hidden bg-nite-bg pb-32 text-nite-ink">
@@ -120,7 +120,7 @@ export default function HeroRota() {
             </div>
           )}
 
-          <form onSubmit={buscar} noValidate className="entrar mt-10 max-w-[28rem]" style={{ '--i': 3 } as CSSProperties} aria-label="Buscar rota a pé">
+          <form onSubmit={buscar} noValidate className="entrar mt-10 max-w-[28rem]" style={{ '--i': 3 } as CSSProperties} aria-label="Ver relatos da região">
             <div className="grid grid-cols-[1.5rem_minmax(0,1fr)] gap-x-4">
               {/* Trilho do bilhete: origem (bolinha neutra), pontilhado, destino (bolinha vermelha) */}
               <div className="row-span-2 flex flex-col items-center pb-5 pt-9" aria-hidden>
@@ -181,7 +181,7 @@ export default function HeroRota() {
               type="submit"
               className="mt-8 inline-flex min-h-12 w-full items-center justify-center rounded-ctl bg-nite-teal px-6 font-bold text-nite-on-teal transition-[filter,transform] duration-150 hover:brightness-110 active:scale-[0.97] sm:w-auto"
             >
-              Buscar rota
+              Ver relatos da região
             </button>
           </form>
 

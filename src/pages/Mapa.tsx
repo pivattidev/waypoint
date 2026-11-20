@@ -57,7 +57,7 @@ export default function Mapa() {
               <strong className="block text-ink">
                 De {busca.origem} para {busca.destino}
               </strong>
-              O cálculo de rota chega com a API. Por enquanto, veja os relatos da região.
+              O cálculo do caminho ainda não está disponível. Veja abaixo os relatos aprovados de cada bairro.
             </p>
           )}
 
