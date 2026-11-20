@@ -1,7 +1,6 @@
 import { useState, type CSSProperties } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import Button from '../components/Button'
-import { AreaTexto } from '../components/Campo'
 import Carimbo from '../components/Carimbo'
 import CategoriaIcone from '../components/CategoriaIcone'
 import { Carregando, ListaVazia, MensagemErro } from '../components/EstadoTela'
@@ -13,9 +12,6 @@ import { mensagemDeErro } from '../services/api'
 import { excluirRelato, listarRelatos, moderarRelato } from '../services/relatos'
 import type { Relato, StatusRelato } from '../types/relato'
 import { formatarDataHora, tempoDecorrido } from '../utils/formatar'
-
-// TODO: sem login por enquanto. O moderador fixo é o cd_moderador 1 do script SQL.
-const MODERADOR_ID = 1
 
 const abas: { status: StatusRelato; rotulo: string }[] = [
   { status: 'PENDENTE', rotulo: 'Pendentes' },
@@ -31,19 +27,14 @@ interface FichaProps {
   onConcluir: (mensagem: string) => void
 }
 
-/** Ficha de moderação: lê o relato inteiro e decide. Só PENDENTE pode ser moderado (regra do Java: senão 409). */
+/** Ficha de moderação: lê o relato inteiro e decide. Só os pendentes mostram Aprovar e Rejeitar. */
 function Ficha({ relato, onConcluir }: FichaProps) {
   const [modo, setModo] = useState<'ler' | 'rejeitar' | 'excluir'>('ler')
-  const [motivo, setMotivo] = useState('')
   const [acao, setAcao] = useState<Acao | null>(null)
   const [erro, setErro] = useState<string | null>(null)
   const [carimbado, setCarimbado] = useState(false)
 
   const executar = async (tipo: Acao) => {
-    if (tipo === 'rejeitar' && motivo.trim().length < 10) {
-      setErro('Explique o motivo em pelo menos 10 letras. Ele fica registrado no relato.')
-      return
-    }
     setAcao(tipo)
     setErro(null)
     try {
@@ -51,21 +42,17 @@ function Ficha({ relato, onConcluir }: FichaProps) {
         await excluirRelato(relato.id)
         onConcluir('Relato excluído.')
       } else {
-        await moderarRelato(relato.id, {
-          status: tipo === 'aprovar' ? 'APROVADO' : 'REJEITADO',
-          moderadorId: MODERADOR_ID,
-          motivoRejeicao: tipo === 'rejeitar' ? motivo.trim() : undefined,
-        })
+        await moderarRelato(relato.id, { status: tipo === 'aprovar' ? 'APROVADO' : 'REJEITADO' })
         if (tipo === 'aprovar') {
           // O carimbo "cai" na ficha e só depois a fila anda: a pessoa vê o que mudou
           setCarimbado(true)
           window.setTimeout(() => onConcluir('Relato aprovado e publicado no mapa.'), 900)
         } else {
-          onConcluir('Relato rejeitado. O motivo ficou registrado.')
+          onConcluir('Relato rejeitado. Ele não aparece no mapa.')
         }
       }
     } catch (e) {
-      // 409 "Este relato já foi moderado." e outros erros chegam com a mensagem do Java
+      // Os erros chegam com a mensagem do Java (ex.: relato não encontrado)
       setErro(mensagemDeErro(e))
       setAcao(null)
     }
@@ -116,12 +103,9 @@ function Ficha({ relato, onConcluir }: FichaProps) {
       )}
 
       {modo === 'rejeitar' && (
-        <div className="entrar mt-6">
-          <label htmlFor={`motivo-${relato.id}`} className="mb-1.5 block text-[15px] font-bold">
-            Motivo da rejeição (obrigatório)
-          </label>
-          <AreaTexto id={`motivo-${relato.id}`} value={motivo} onChange={(e) => setMotivo(e.target.value)} />
-        </div>
+        <p role="alert" className="entrar mt-6 border-l-2 border-alert pl-4 font-bold text-alert-text">
+          Rejeitar este relato? Ele não vai aparecer no mapa.
+        </p>
       )}
 
       {modo === 'excluir' && (
@@ -234,7 +218,7 @@ export default function Moderacao() {
           )
         }
       >
-        <p>Aprove o que ajuda outros pedestres. Rejeite com motivo o que não ajuda ou expõe alguém.</p>
+        <p>Aprove o que ajuda outros pedestres. Rejeite o que não ajuda ou expõe alguém.</p>
       </PageHeader>
 
       <div role="group" aria-label="Filtrar por status" className="entrar faixa-rolavel -mx-4 mb-10 border-b border-line px-4 sm:mx-0 sm:px-0" style={{ '--i': 3 } as CSSProperties}>

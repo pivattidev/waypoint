@@ -30,9 +30,7 @@ export interface NovoRelato {
   dataOcorrencia: string // aaaa-mm-dd (o Java guarda só a data)
 }
 
-/** Corpo do PATCH /relatos/{id}/moderacao. */
+/** Decisão da moderação: aprovar ou rejeitar (o Java guarda só o novo status). */
 export interface ModeracaoRelato {
   status: Exclude<StatusRelato, 'PENDENTE'>
-  moderadorId: number
-  motivoRejeicao?: string
 }

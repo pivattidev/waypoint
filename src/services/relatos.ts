@@ -2,7 +2,6 @@ import type { CategoriaJava, NovoTrechoJava, RelatoJava, RelatoJavaEntrada, Trec
 import type { ModeracaoRelato, NovoRelato, Relato, StatusRelato } from '../types/relato'
 import { STATUS_PARA_JAVA, dataParaJava, juntarTexto, relatoDoJava } from '../utils/conversaoJava'
 import { ApiError, requisicao } from './api'
-import { bancoMock, falhar, responder } from './mock/servidor'
 import { REGIOES } from './regioes'
 
 /**
@@ -84,21 +83,24 @@ export async function enviarRelato(regiaoId: number, dados: NovoRelato): Promise
   }
 }
 
-/** PATCH /relatos/{id}/moderacao → 200 · 409 se já moderado */
-export function moderarRelato(id: number, dados: ModeracaoRelato): Promise<Relato> {
-  const caminho = `/relatos/${id}/moderacao`
-  const alvo = bancoMock.relatos.find((r) => r.id === id)
-  if (!alvo) return falhar(404, 'Não encontrado', 'Relato não encontrado.', caminho)
-  if (alvo.status !== 'PENDENTE') return falhar(409, 'Conflito', 'Este relato já foi moderado.', caminho)
-  alvo.status = dados.status
-  alvo.motivoRejeicao = dados.motivoRejeicao ?? null
-  return responder(alvo)
+/**
+ * O PUT do Java regrava o relato INTEIRO. Então buscamos o relato como está no banco,
+ * trocamos só o status e mandamos de volta.
+ */
+export async function moderarRelato(id: number, dados: ModeracaoRelato): Promise<void> {
+  const atual = await requisicao<RelatoJava>(`/relato/${id}`)
+  const corpo: RelatoJavaEntrada = {
+    descricao: atual.descricao,
+    dataRelato: atual.dataRelato,
+    status: STATUS_PARA_JAVA[dados.status],
+    usuario: { id: atual.usuario.id },
+    trecho: { idTrecho: atual.trecho.idTrecho },
+    categoria: { idCategoria: atual.categoria.idCategoria },
+  }
+  await requisicao<string>(`/relato/${id}`, { method: 'PUT', body: JSON.stringify(corpo) })
 }
 
-/** DELETE /relatos/{id} → 204 */
-export function excluirRelato(id: number): Promise<void> {
-  const indice = bancoMock.relatos.findIndex((r) => r.id === id)
-  if (indice === -1) return falhar(404, 'Não encontrado', 'Relato não encontrado.', `/relatos/${id}`)
-  bancoMock.relatos.splice(indice, 1)
-  return responder(undefined)
+/** DELETE /relato/{id} → 204 */
+export async function excluirRelato(id: number): Promise<void> {
+  await requisicao<void>(`/relato/${id}`, { method: 'DELETE' })
 }
