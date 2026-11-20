@@ -199,15 +199,17 @@ npm run lint      # confere o código com o ESLint
 | | |
 | :--- | :--- |
 | Repositório (GitHub) | https://github.com/pivattidev/waypoint |
-| Site publicado (Vercel) | PREENCHER |
+| Site publicado | https://waypoint-gs.vercel.app/ |
 | API Java (Render) | https://waypoint-api-k9vs.onrender.com |
-| Vídeo de demonstração (YouTube, até 3 min) | PREENCHER |
+| Vídeo de demonstração (YouTube, até 3 min) | https://youtu.be/YfE4qltPVps |
 
 ## 📬 Contato
 
 - Pela página **Contato** do próprio site (`/contato`).
 - Pelos perfis de GitHub e LinkedIn de cada integrante, em [Integrantes](#-integrantes).
 - Dúvidas sobre o código: abra uma *issue* em https://github.com/pivattidev/waypoint/issues.
+
+> **Declaração de uso de IA:** o grupo usou o Claude e o Codex (ChatGPT) como ferramenta de apoio no desenvolvimento do código, com referências técnicas e visuais e recomendações de ajustes. Todo o conteúdo foi revisado e testado, e o grupo compreende e sabe explicar tudo o que foi feito.
 
 ---
 
